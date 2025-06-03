@@ -253,13 +253,13 @@ class Arch242Assembler:
                 binary_lines = []
                 for byte in output_bytes:
                     binary_lines.append(f'{byte:08b}')
-                return '\n'.join(binary_lines).encode('ascii')
+                return binary_lines
             
             case 'hex':
                 hex_lines = []
                 for byte in output_bytes:
                     hex_lines.append(f'{byte:02x}')
-                return '\n'.join(hex_lines).encode('ascii')                         
+                return hex_lines                        
 
 def main():
     if len(sys.argv) != 3:
@@ -280,7 +280,8 @@ def main():
     assembler = Arch242Assembler()
 
     try:
-        output = assembler.assemble(input_file, output_format)
+        lines = assembler.assemble(input_file, output_format)
+        output = '\n'.join(lines).encode('ascii')
 
         base_name = input_file.rsplit('.', 1)[0]
         output_file = f"{base_name}.{output_format}"
