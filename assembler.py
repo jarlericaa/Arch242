@@ -1,9 +1,10 @@
 import sys
+import re
 
 class Arch242Assembler:
     def __init__(self):
         self.instrs = {
-            # instruction with reg, TBA since may confusion pa: 17 18 25 26
+            # instruction with reg: 17 18 25 26
             # single-byte instructions
             'rot-r': (1, [0x00],),
             'rot-l': (1, [0x01],),
@@ -29,22 +30,22 @@ class Arch242Assembler:
             'or*-mba': (1, [0x1F],),
             'clr-cf': (1, [0x2A],),
             'set-cf': (1, [0x2B],),
-            'set-ei': (1, [0x2C],),
-            'clr-ei': (1, [0x2D],),
+            # 'set-ei': (1, [0x2C],),
+            # 'clr-ei': (1, [0x2D],),
             'ret': (1, [0x2E],),
-            'retc': (1, [0x2F],),
-            'from-pa': (1, [0x30],),
+            # 'retc': (1, [0x2F],),
+            'from-ioa': (1, [0x30],), # changed from 'from-ioa'
             'inc': (1, [0x31],),
-            'to-ioa': (1, [0x32],),
-            'to-iob': (1, [0x33],),
-            'to-ioc': (1, [0x34],),
+            # 'to-ioa': (1, [0x32],),
+            # 'to-iob': (1, [0x33],),
+            # 'to-ioc': (1, [0x34],),
             'bcd': (1, [0x36],),
-            'timer-start': (1, [0x38],),
-            'timer-end': (1, [0x39],),
-            'from-timerl': (1, [0x3A],),
-            'from-timerh': (1, [0x3B],),
-            'to-timerl': (1, [0x3C],),
-            'to-timerh': (1, [0x3D],),
+            # 'timer-start': (1, [0x38],),
+            # 'timer-end': (1, [0x39],),
+            # 'from-timerl': (1, [0x3A],),
+            # 'from-timerh': (1, [0x3B],),
+            # 'to-timerl': (1, [0x3C],),
+            # 'to-timerh': (1, [0x3D],),
             'nop': (1, [0x3E],),
             'dec': (1, [0x3F],),
             
@@ -58,10 +59,9 @@ class Arch242Assembler:
             'RC': 2, 'rc': 2,
             'RD': 3, 'rd': 3,
             'RE': 4, 're': 4,
-            'RF': 5, 'rf': 5
         }
 
-        # self.labels = {}
+        self.labels = {}
         self.curr_address = 0
 
     def parse_imm(self, value: str) -> int:
@@ -73,6 +73,21 @@ class Arch242Assembler:
             case _:
                 return int(value)
             
+    def parse_reg(self, reg_str: str) -> int:
+        reg_str = reg_str.strip().lower()
+        if reg_str in self.regs:
+            return self.regs[reg_str]
+        try:
+            reg_num = int(reg_str)
+            if 0 <= reg_num <= 4:
+                return reg_num
+            else:
+                raise ValueError(f"Invalid register number: {reg_num}")
+            
+        except:
+            raise ValueError(f"Unknown register: {reg_str}")
+        
+
     def encode_instructions(self, parts: list[str]):
         if not parts:
             return None
@@ -82,7 +97,7 @@ class Arch242Assembler:
         match instruction:
             case '.byte':
                 if len(parts) != 2:
-                    raise ValueError("Invalide .byte")
+                    raise ValueError("Invalid .byte")
                 value = self.parse_imm(parts[1])
                 if value > 255:
                     raise ValueError(f"Value too large for .byte: {value}")
@@ -91,7 +106,31 @@ class Arch242Assembler:
             case inst if inst in self.instrs:
                 return list(self.instrs[inst][1])
             
-            case 'add' | 'sub' | 'and' | 'xor' | 'or' | 'r4' | 'timer':
+            case 'inc*-reg' | 'to-reg':
+                if len(parts) != 2:
+                    raise ValueError(f"Invalid {instruction} format")
+                opcode = {
+                    'inc*-reg': 0x10,
+                    'to-reg': 0x20,
+                }
+
+                reg = self.parse_reg(parts[1])
+                return [opcode[instruction]| (reg << 1)]
+            
+            case 'dec*-reg'| 'from-reg':
+                if len(parts) != 2:
+                    raise ValueError(f"Invalid {instruction} format")
+                
+                opcode = {
+                    'dec*-reg': 0x10,
+                    'from-reg': 0x20,
+                }
+
+                reg = self.parse_reg(parts[1])
+                return [opcode[instruction] | (reg << 1) | 0x01]
+
+                       
+            case 'add' | 'sub' | 'and' | 'xor' | 'or' | 'r4':   # remove 'timer'
                 if len(parts) != 2:
                     raise ValueError(f"Invalid {instruction} format")
                 
@@ -107,7 +146,7 @@ class Arch242Assembler:
                     'xor': 0x43,
                     'or': 0x44,
                     'r4': 0x46,
-                    'timer': 0x47,
+                    # 'timer': 0x47,
                 }
                 return [opcode[instruction], imm]
             
@@ -147,7 +186,7 @@ class Arch242Assembler:
                 if bit > 3:
                     raise ValueError(f"Invalid bit value for b-bit: {bit}")
                 
-                target = self.parse_imm(parts[2]) # if parts[2] not in self.labels else self.labels[parts[2]]
+                target = self.parse_imm(parts[2]) if parts[2] not in self.labels else self.labels[parts[2]]
 
                 if target > 2047:
                     raise ValueError(f"Branch target too large: {target}")
@@ -157,11 +196,11 @@ class Arch242Assembler:
 
                 return [0x80 | (bit << 3) | high_bits, low_bits]
             
-            case 'bnz-a' | 'bnz-b' | 'beqz' | 'bnez' | 'beqz-cf' | 'bnez-cf' | 'b-timer' | 'bnz-d':
+            case 'bnz-a' | 'bnz-b' | 'beqz' | 'bnez' | 'beqz-cf' | 'bnez-cf' | 'bnz-d': # remove b-timer
                 if len(parts) != 2:
                     raise ValueError(f"Invalid {instruction} format")
                 
-                target = self.parse_imm(parts[1]) # if parts[1] not in self.labels else self.labels[parts[1]]
+                target = self.parse_imm(parts[1]) if parts[1] not in self.labels else self.labels[parts[1]]
 
                 if target > 2047:
                     raise ValueError(f"Branch target too large: {target}")
@@ -176,7 +215,7 @@ class Arch242Assembler:
                     'bnez': 0xB8,
                     'beqz-cf': 0xC0,
                     'bnez-cf': 0xC8,
-                    'b-timer': 0xD0,
+                    # 'b-timer': 0xD0,
                     'bnz-d': 0xD8
                 }
 
@@ -186,7 +225,7 @@ class Arch242Assembler:
                 if len(parts) != 2:
                     raise ValueError(f"Invalid {instruction} format")
                 
-                target = self.parse_imm(parts[1]) # if parts[1] not in self.labels else self.labels[parts[1]]
+                target = self.parse_imm(parts[1]) if parts[1] not in self.labels else self.labels[parts[1]]
 
                 if target > 4095:
                     raise ValueError(f"Branch target too large: {target}")
@@ -212,13 +251,14 @@ class Arch242Assembler:
         match instruction:
             case '.byte':
                 return 1
+
             case inst if inst in self.instrs:
                 return self.instrs[inst][0]
             
-            case 'add' | 'sub' | 'and' | 'xor' | 'or' | 'r4' | 'timer' | 'rarb' | 'rcrd':
+            case 'add' | 'sub' | 'and' | 'xor' | 'or' | 'r4'  | 'rarb' | 'rcrd':
                 return 2
             
-            case 'acc':
+            case 'acc' | 'inc*-reg' | 'dec*-reg' | 'to-reg' | 'from-reg':
                 return 1
             
             case inst if inst.startswith('b') or inst == 'call':
@@ -228,6 +268,25 @@ class Arch242Assembler:
                 return 0
             
     def process_line(self, line: str):
+        # removing comments
+        comment_pos = line.find('#')
+        if comment_pos >= 0:
+            line = line[:comment_pos]
+
+        line = line.strip()
+        if not line:
+            return None
+        
+        # checking for labels 
+        colon_pos = line.find(':')
+
+        if colon_pos >= 0:
+            label = line[:colon_pos].strip()
+            self.labels[label] = self.curr_address
+            line = line[colon_pos + 1:].strip()
+            if not line:
+                return None
+            
         parts = line.split()
 
         if not parts:
@@ -236,6 +295,34 @@ class Arch242Assembler:
         return self.encode_instructions(parts)
     
     def assemble(self, input_file: str, output_format: str):
+        # first pass, collecting labels and removing comments
+        self.curr_address = 0
+        with open(input_file, 'r') as f:
+            for line in f:
+                line = line.strip()
+
+                # handling comments
+                comment_pos = line.find('#')
+                if comment_pos >= 0:
+                    line = line[:comment_pos]
+
+                line = line.strip()
+                if not line:
+                    continue
+
+
+                # handling labels
+                colon_pos = line.find(':')
+                if colon_pos >= 0:
+                    label = line[:colon_pos].strip()
+                    self.labels[label] = self.curr_address
+                    line = line[colon_pos + 1:].strip()
+
+                if line:
+                    parts = line.split()
+                    self.curr_address += self.get_instruction_size(parts)
+
+        # second pass, generating code
         self.curr_address = 0
         output_bytes = []
         with open(input_file, 'r') as f:
@@ -254,12 +341,14 @@ class Arch242Assembler:
                 for byte in output_bytes:
                     binary_lines.append(f'{byte:08b}')
                 return binary_lines
+                # return '\n'.join(binary_lines).encode('ascii')
             
             case 'hex':
                 hex_lines = []
                 for byte in output_bytes:
                     hex_lines.append(f'{byte:02x}')
-                return hex_lines                        
+                return hex_lines
+                # return '\n'.join(hex_lines).encode('ascii')                         
 
 def main():
     if len(sys.argv) != 3:
@@ -286,10 +375,11 @@ def main():
         base_name = input_file.rsplit('.', 1)[0]
         output_file = f"{base_name}.{output_format}"
 
+
         with open(output_file, 'w') as f:
             f.write(output.decode('ascii'))
 
-        print(f"Assembly successful. Output writen to {output_file}")
+        print(f"Assembly successful. Output written to {output_file}")
 
                 
     except FileNotFoundError:
