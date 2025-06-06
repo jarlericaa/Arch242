@@ -34,7 +34,7 @@ class Arch242Assembler:
             # 'clr-ei': (1, [0x2D],),
             'ret': (1, [0x2E],),
             # 'retc': (1, [0x2F],),
-            'from-ioa': (1, [0x30],), # changed from 'from-ioa'
+            'from-ioa': (1, [0x32],), # changed from 'from-ioa'
             'inc': (1, [0x31],),
             # 'to-ioa': (1, [0x32],),
             # 'to-iob': (1, [0x33],),
