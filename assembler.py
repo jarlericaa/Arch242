@@ -53,14 +53,6 @@ class Arch242Assembler:
             'shutdown': (2, [0x37, 0x3E])
         }
 
-        self.regs = {
-            'RA': 0, 'ra': 0,
-            'RB': 1, 'rb': 1,
-            'RC': 2, 'rc': 2,
-            'RD': 3, 'rd': 3,
-            'RE': 4, 're': 4,
-        }
-
         self.labels = {}
         self.curr_address = 0
 
@@ -74,9 +66,6 @@ class Arch242Assembler:
                 return int(value)
             
     def parse_reg(self, reg_str: str) -> int:
-        reg_str = reg_str.strip().lower()
-        if reg_str in self.regs:
-            return self.regs[reg_str]
         try:
             reg_num = int(reg_str)
             if 0 <= reg_num <= 4:

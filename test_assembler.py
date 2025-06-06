@@ -133,16 +133,16 @@ def test_assembler():
         {
             'name': 'Register instructions',
             'code': '''
-                inc*-reg RA
-                inc*-reg RB
-                inc*-reg RC
-                inc*-reg RD
-                inc*-reg RE
-                dec*-reg RA
-                dec*-reg RB
-                dec*-reg RC
-                dec*-reg RD
-                dec*-reg RE
+                inc*-reg 0
+                inc*-reg 1
+                inc*-reg 2
+                inc*-reg 3
+                inc*-reg 4
+                dec*-reg 0
+                dec*-reg 1
+                dec*-reg 2
+                dec*-reg 3
+                dec*-reg 4
             ''',
             'expected_bin': ['00010000', '00010010', '00010100', '00010110', 
                            '00011000', '00010001', '00010011', '00010101', 
@@ -155,16 +155,16 @@ def test_assembler():
         {
             'name': 'to-reg and from-reg instructions',
             'code': '''
-                to-reg RA
-                to-reg RB
-                to-reg RC
-                to-reg RD
-                to-reg RE
-                from-reg RA
-                from-reg RB
-                from-reg RC
-                from-reg RD
-                from-reg RE
+                to-reg 0
+                to-reg 1
+                to-reg 2
+                to-reg 3
+                to-reg 4
+                from-reg 0
+                from-reg 1
+                from-reg 2
+                from-reg 3
+                from-reg 4
             ''',
             'expected_bin': ['00100000', '00100010', '00100100', '00100110', 
                            '00101000', '00100001', '00100011', '00100101', 
@@ -208,19 +208,6 @@ def test_assembler():
                            'd8', '00', '90', '00']
         },
         
-        # Test 13: Mixed register names
-        {
-            'name': 'Mixed case register names',
-            'code': '''
-                to-reg ra
-                to-reg Rb
-                from-reg rC
-                from-reg RD
-                inc*-reg re
-            ''',
-            'expected_bin': ['00100000', '00100010', '00100101', '00100111', '00011000'],
-            'expected_hex': ['20', '22', '25', '27', '18']
-        }
     ]
     
     print(f"Total test cases defined: {len(test_cases)}")  # Debug line
