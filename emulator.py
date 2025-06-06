@@ -57,13 +57,12 @@ class Arch242Emulator:
         self.ioa = 0 # 4-bit register
 
         self.running = True
-        self.led_display_base = 192
         pyxel.init(CELL_DIM * NUM_COLS, CELL_DIM * NUM_ROWS, title="Arch242 Emulator", fps=60)
         pyxel.run(self.update, self.draw)
 
     def update(self):
         if self.running and self.pc < len(self.instr_mem):
-            self.handle_input()
+            self.read_input()
             self.process_instruction(self.instr_mem[self.pc])
 
     def draw(self):
@@ -76,7 +75,7 @@ class Arch242Emulator:
                 if val & (1 << bit):
                     pyxel.rect(col * CELL_DIM, row * CELL_DIM, CELL_DIM, CELL_DIM, 11)
 
-    def handle_input(self):
+    def read_input(self):
         if pyxel.btn(pyxel.KEY_UP):
             self.ioa = 1
         elif pyxel.btn(pyxel.KEY_DOWN):
