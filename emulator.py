@@ -72,11 +72,12 @@ class Arch242Emulator:
         pyxel.cls(0)
         for addr in range(192, 242):
             val = self.data_mem[addr] & 0x0F
-            row = (addr - 192) // 2
+            row = (addr - 192) // (NUM_COLS // 4)
             for bit in range(4):
                 col = ((addr - 192) * 4 + bit) % 20
                 if val & (1 << bit):
-                    pyxel.rect(col * 5, row * 5, 5, 5, 11)
+                    print("DRAW")
+                    pyxel.rect(col * CELL_DIM, row * CELL_DIM, CELL_DIM, CELL_DIM, 11)
 
     def handle_input(self):
         if pyxel.btn(pyxel.KEY_UP):
