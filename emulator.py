@@ -7,8 +7,41 @@ class Arch242Emulator:
         if len(instr_hex) > 2**16:
             sys.exit("Instructions do not fit the memory")
         
-        self.pc = 0
+        self.isa = Arch242ISA(self)
+        self.dispatch_table = {
+            0x00: self.isa.rotr, 0x01: self.isa.rotl, 0x02: self.isa.rotrc,
+            0x03: self.isa.rotlc, 0x04: self.isa.frommba, 0x05: self.isa.tomba,
+            0x06: self.isa.frommdc, 0x07: self.isa.tomdc, 0x08: self.isa.addcmba,
+            0x09: self.isa.addmba, 0x0A: self.isa.subcmba, 0x0B: self.isa.submba,
+            0x0C: self.isa.incmba, 0x0D: self.isa.decmba, 0x0E: self.isa.incmdc,
+            0x0F: self.isa.decmdc, 0x1A: self.isa.andba, 0x1B: self.isa.xorba,
+            0x1C: self.isa.orba, 0x1D: self.isa.andmba, 0x1E: self.isa.xormba,
+            0x1F: self.isa.ormba, 0x2A: self.isa.clrcf, 0x2B: self.isa.setcf,
+            0x2E: self.isa.ret, 0x31: self.isa.inc, 0x32: self.isa.fromioa, 
+            0x36: self.isa.bcd, 0x37: self.isa.shutdown, 0x3E: self.isa.nop,
+            0x3F: self.isa.dec, 0x40: self.isa.addimm, 0x41: self.isa.subimm,
+            0x42: self.isa.andimm, 0x43: self.isa.xorimm, 0x44: self.isa.orimm,
+            0x46: self.isa.r4imm, 
 
+            # R-type
+            # inc*-reg 0001RRR0
+            0x10: self.isa.increg, 0x12: self.isa.increg, 0x14: self.isa.increg,
+            0x16: self.isa.increg, 0x18: self.isa.increg,
+
+            # dec*-reg 0001RRR1
+            0x11: self.isa.decreg, 0x13: self.isa.decreg, 0x15: self.isa.decreg,
+            0x17: self.isa.decreg, 0x19: self.isa.decreg,
+
+            # to-reg 0010RRR0
+            0x20: self.isa.toreg, 0x22: self.isa.toreg, 0x24: self.isa.toreg,
+            0x26: self.isa.toreg, 0x28: self.isa.toreg,
+
+            # from-reg 0010RRR1
+            0x21: self.isa.fromreg, 0x23: self.isa.fromreg, 0x25: self.isa.fromreg,
+            0x27: self.isa.fromreg, 0x29: self.isa.fromreg,
+        }
+
+        self.pc = 0
         self.instr_mem = instr_hex # 16-bit wide
         self.data_mem = bytearray(256) # 8-bit wide
 
@@ -51,10 +84,20 @@ class Arch242Emulator:
             self.ioa = 0
 
     def process_instruction(self, instr: int):
-        pass
+        try:
+            if 0x50 <= instr <= 0x5F:
+                self.isa.rarbimm()
+            elif 0x60 <= instr <= 0x6F:
+                self.isa.rcrdimm()
+            elif 0x70 <= instr <= 0x7F:
+                self.isa.accimm()
+            else:
+                raise(KeyError)
+        except KeyError:
+
 
 class Arch242ISA:
-    def init(self, emulator: Arch242Emulator):
+    def __init__(self, emulator: Arch242Emulator):
         self.emu = emulator
 
     def rotr(self):
@@ -225,7 +268,10 @@ class Arch242ISA:
         self.emu.pc += 1
 
     def shutdown(self):
-        pyxel.quit()
+        if self.emu.instr_mem[self.emu.pc+1] == 0x3E:
+            pyxel.quit()
+        else:
+            raise KeyError
 
     def nop(self):
         pass
@@ -235,38 +281,62 @@ class Arch242ISA:
         self.emu.pc += 1
 
     def addimm(self):
-        self.emu.acc = self.emu.acc + (self.emu.instr_mem[self.emu.pc+1] & 0x0F)
-        self.emu.pc += 2
+        if not (self.emu.instr_mem[self.emu.pc+1] >> 4):
+            self.emu.acc = self.emu.acc + (self.emu.instr_mem[self.emu.pc+1] & 0x0F)
+            self.emu.pc += 2
+        else:
+            raise ValueError
 
     def subimm(self):
-        self.emu.acc = self.emu.acc - (self.emu.instr_mem[self.emu.pc+1] & 0x0F)
-        self.emu.pc += 2
+        if not (self.emu.instr_mem[self.emu.pc+1] >> 4):
+            self.emu.acc = self.emu.acc - (self.emu.instr_mem[self.emu.pc+1] & 0x0F)
+            self.emu.pc += 2
+        else:
+            raise ValueError
     
     def andimm(self):
-        self.emu.acc = self.emu.acc & (self.emu.instr_mem[self.emu.pc+1] & 0x0F)
-        self.emu.pc += 2
+        if not (self.emu.instr_mem[self.emu.pc+1] >> 4):
+            self.emu.acc = self.emu.acc & (self.emu.instr_mem[self.emu.pc+1] & 0x0F)
+            self.emu.pc += 2
+        else:
+            raise ValueError
 
     def xorimm(self):
-        self.emu.acc = self.emu.acc ^ (self.emu.instr_mem[self.emu.pc+1] & 0x0F)
-        self.emu.pc += 2
+        if not (self.emu.instr_mem[self.emu.pc+1] >> 4):
+            self.emu.acc = self.emu.acc ^ (self.emu.instr_mem[self.emu.pc+1] & 0x0F)
+            self.emu.pc += 2
+        else:
+            raise ValueError
 
     def orimm(self):
-        self.emu.acc = self.emu.acc | (self.emu.instr_mem[self.emu.pc+1] & 0x0F)
-        self.emu.pc += 2
+        if not (self.emu.instr_mem[self.emu.pc+1] >> 4):
+            self.emu.acc = self.emu.acc | (self.emu.instr_mem[self.emu.pc+1] & 0x0F)
+            self.emu.pc += 2
+        else:
+            raise ValueError
 
     def r4imm(self):
-        self.emu.reg[4] = self.emu.instr_mem[self.emu.pc+1] & 0x0F
-        self.emu.pc += 2
+        if not (self.emu.instr_mem[self.emu.pc+1] >> 4):
+            self.emu.reg[4] = self.emu.instr_mem[self.emu.pc+1] & 0x0F
+            self.emu.pc += 2
+        else:
+            raise ValueError
 
     def rarbimm(self):
-        self.emu.reg[0] = self.emu.instr_mem[self.emu.pc] & 0x0F
-        self.emu.reg[1] = self.emu.instr_mem[self.emu.pc+1] & 0x0F
-        self.emu.pc += 2
+        if not (self.emu.instr_mem[self.emu.pc+1] >> 4):
+            self.emu.reg[0] = self.emu.instr_mem[self.emu.pc] & 0x0F
+            self.emu.reg[1] = self.emu.instr_mem[self.emu.pc+1] & 0x0F
+            self.emu.pc += 2
+        else:
+            raise ValueError
 
     def rcrdimm(self):
-        self.emu.reg[2] = self.emu.instr_mem[self.emu.pc] & 0x0F
-        self.emu.reg[3] = self.emu.instr_mem[self.emu.pc+1] & 0x0F
-        self.emu.pc += 2
+        if not (self.emu.instr_mem[self.emu.pc+1] >> 4):
+            self.emu.reg[2] = self.emu.instr_mem[self.emu.pc] & 0x0F
+            self.emu.reg[3] = self.emu.instr_mem[self.emu.pc+1] & 0x0F
+            self.emu.pc += 2
+        else:
+            raise ValueError
 
     def accimm(self):
         self.emu.acc = self.emu.instr_mem[self.emu.pc] & 0x0F
