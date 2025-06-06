@@ -46,8 +46,6 @@ class Arch242Emulator:
             0x27: self.isa.fromreg, 0x29: self.isa.fromreg,
         }
 
-        # TODO: datamem modifications
-
         self.pc = 0
         self.instr_mem = list(map(lambda x: int(x, 16), instr_hex)) # 16-bit wide
         self.data_mem = bytearray(256) # 8-bit wide
@@ -76,7 +74,6 @@ class Arch242Emulator:
             for bit in range(4):
                 col = ((addr - 192) * 4 + bit) % 20
                 if val & (1 << bit):
-                    print("DRAW")
                     pyxel.rect(col * CELL_DIM, row * CELL_DIM, CELL_DIM, CELL_DIM, 11)
 
     def handle_input(self):
@@ -85,9 +82,9 @@ class Arch242Emulator:
         elif pyxel.btn(pyxel.KEY_DOWN):
             self.ioa = 2
         elif pyxel.btn(pyxel.KEY_LEFT):
-            self.ioa = 3
-        elif pyxel.btn(pyxel.KEY_RIGHT):
             self.ioa = 4
+        elif pyxel.btn(pyxel.KEY_RIGHT):
+            self.ioa = 8
         else:
             self.ioa = 0
 
