@@ -41,6 +41,8 @@ class Arch242Emulator:
             0x27: self.isa.fromreg, 0x29: self.isa.fromreg,
         }
 
+        # TODO: datamem modifications
+
         self.pc = 0
         self.instr_mem = instr_hex # 16-bit wide
         self.data_mem = bytearray(256) # 8-bit wide
@@ -91,10 +93,32 @@ class Arch242Emulator:
                 self.isa.rcrdimm()
             elif 0x70 <= instr <= 0x7F:
                 self.isa.accimm()
+            elif 0x80 <= instr <= 0x9F:
+                self.isa.bbitkimm()
+            elif 0xA0 <= instr <= 0xA7:
+                self.isa.bnzaimm()
+            elif 0xA8 <= instr <= 0xAF:
+                self.isa.bnzbimm()
+            elif 0xB0 <= instr <= 0xB7:
+                self.isa.beqzimm()
+            elif 0xB8 <= instr <= 0xBF:
+                self.isa.bnezimm()
+            elif 0xC0 <= instr <= 0xC7:
+                self.isa.beqzcfimm()
+            elif 0xC8 <= instr <= 0xCF:
+                self.isa.bnezcfimm()
+            elif 0xD8 <= instr <= 0xDF:
+                self.isa.bnzdimm()
+            elif 0xE0 <= instr <= 0xEF:
+                self.isa.bimm()
+            elif 0xF0 <= instr <= 0xFF:
+                self.isa.callimm()
+            elif instr in self.dispatch_table:
+                self.dispatch_table[instr]()
             else:
                 raise(KeyError)
-        except KeyError:
-
+        except (ValueError, KeyError) as e:
+            sys.exit(f"Invalid Instruction: Found {e} while running instruction at {self.pc}")
 
 class Arch242ISA:
     def __init__(self, emulator: Arch242Emulator):
