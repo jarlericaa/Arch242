@@ -175,7 +175,7 @@ class Arch242Assembler:
 
                 opcode = {'rarb': 0x50, 'rcrd': 0x60,}
 
-                return [opcode[instruction] | high, low]
+                return [opcode[instruction] | low, high]
             
             case 'b-bit':
                 if len(parts) != 3:
