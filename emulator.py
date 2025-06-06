@@ -3,7 +3,7 @@ import pyxel
 from constants import *
 
 class Arch242Emulator:
-    def __init__(self, instr_hex: list[int]):
+    def __init__(self, instr_hex: list[str]):
         if len(instr_hex) > 2**16:
             sys.exit("Instructions do not fit the memory")
         
@@ -61,7 +61,7 @@ class Arch242Emulator:
     def update(self):
         if self.running or self.pc >= len(self.instr_mem):
             self.handle_input()
-            self.process_instruction(self.instr_mem[self.pc])
+            self.process_instruction(int(self.instr_mem[self.pc], 16))
         else:
             sys.exit("Program Complete")
 
@@ -215,13 +215,13 @@ class Arch242ISA:
         self.emu.pc += 1
 
     def increg(self):
-        curr_instr = self.emu.instr_mem[self.emu.pc]
+        curr_instr = int(self.emu.instr_mem[self.emu.pc], 16)
         curr_reg = curr_instr & 0xE >> 1
         self.emu.reg[curr_reg] = (self.emu.reg[curr_reg] + 1) & 0xFF
         self.emu.pc += 1
 
     def decreg(self):
-        curr_instr = self.emu.instr_mem[self.emu.pc]
+        curr_instr = int(self.emu.instr_mem[self.emu.pc], 16)
         curr_reg = curr_instr & 0x0E >> 1
         self.emu.reg[curr_reg] = (self.emu.reg[curr_reg] - 1) & 0xFF
         self.emu.pc += 1
@@ -257,12 +257,12 @@ class Arch242ISA:
         self.emu.pc += 1
 
     def toreg(self):
-        curr_reg = (self.emu.instr_mem[self.emu.pc] & 0xe) >> 1
+        curr_reg = (int(self.emu.instr_mem[self.emu.pc], 16) & 0x0E) >> 1
         self.emu.reg[curr_reg] = self.emu.acc
         self.emu.pc += 1
 
     def fromreg(self):
-        curr_reg = (self.emu.instr_mem[self.emu.pc] & 0xe) >> 1
+        curr_reg = (int(self.emu.instr_mem[self.emu.pc], 16) & 0x0E) >> 1
         self.emu.acc = self.emu.reg[curr_reg]
         self.emu.pc += 1
 
@@ -295,7 +295,7 @@ class Arch242ISA:
         self.emu.pc += 1
 
     def shutdown(self):
-        if self.emu.instr_mem[self.emu.pc+1] == 0x3E:
+        if int(self.emu.instr_mem[self.emu.pc+1], 16) == 0x3E:
             self.emu.running = False
             pyxel.quit()
         else:
@@ -310,73 +310,85 @@ class Arch242ISA:
         self.emu.pc += 1
 
     def addimm(self):
-        if not (self.emu.instr_mem[self.emu.pc+1] >> 4):
-            self.emu.acc = (self.emu.acc + self.emu.instr_mem[self.emu.pc+1]) & 0x0F
+        next_instr = int(self.emu.instr_mem[self.emu.pc+1], 16)
+        if not (next_instr >> 4):
+            self.emu.acc = self.emu.acc + (next_instr & 0x0F)
             self.emu.pc += 2
         else:
             raise ValueError
 
     def subimm(self):
-        if not (self.emu.instr_mem[self.emu.pc+1] >> 4):
-            self.emu.acc = (self.emu.acc - self.emu.instr_mem[self.emu.pc+1]) & 0x0F
+        next_instr = int(self.emu.instr_mem[self.emu.pc+1], 16)
+        if not (next_instr >> 4):
+            self.emu.acc = self.emu.acc - (next_instr & 0x0F)
             self.emu.pc += 2
         else:
             raise ValueError
     
     def andimm(self):
-        if not (self.emu.instr_mem[self.emu.pc+1] >> 4):
-            self.emu.acc = (self.emu.acc & self.emu.instr_mem[self.emu.pc+1]) & 0x0F
+        next_instr = int(self.emu.instr_mem[self.emu.pc+1], 16)
+        if not (next_instr >> 4):
+            self.emu.acc = self.emu.acc & (next_instr & 0x0F)
             self.emu.pc += 2
         else:
             raise ValueError
 
     def xorimm(self):
-        if not (self.emu.instr_mem[self.emu.pc+1] >> 4):
-            self.emu.acc = (self.emu.acc ^ self.emu.instr_mem[self.emu.pc+1]) & 0x0F
+        next_instr = int(self.emu.instr_mem[self.emu.pc+1], 16)
+        if not (next_instr >> 4):
+            self.emu.acc = self.emu.acc ^ (next_instr & 0x0F)
             self.emu.pc += 2
         else:
             raise ValueError
 
     def orimm(self):
-        if not (self.emu.instr_mem[self.emu.pc+1] >> 4):
-            self.emu.acc = (self.emu.acc | self.emu.instr_mem[self.emu.pc+1]) & 0x0F
+        next_instr = int(self.emu.instr_mem[self.emu.pc+1], 16)
+        if not (next_instr >> 4):
+            self.emu.acc = self.emu.acc | (next_instr & 0x0F)
             self.emu.pc += 2
         else:
             raise ValueError
 
     def r4imm(self):
-        if not (self.emu.instr_mem[self.emu.pc+1] >> 4):
-            self.emu.reg[4] = self.emu.instr_mem[self.emu.pc+1] & 0x0F
+        next_instr = int(self.emu.instr_mem[self.emu.pc+1], 16)
+        if not (next_instr >> 4):
+            self.emu.reg[4] = next_instr & 0x0F
             self.emu.pc += 2
         else:
             raise ValueError
 
     def rarbimm(self):
-        if not (self.emu.instr_mem[self.emu.pc+1] >> 4):
-            self.emu.reg[0] = self.emu.instr_mem[self.emu.pc] & 0x0F
-            self.emu.reg[1] = self.emu.instr_mem[self.emu.pc+1] & 0x0F
+        curr_instr = int(self.emu.instr_mem[self.emu.pc], 16)
+        next_instr = int(self.emu.instr_mem[self.emu.pc+1], 16)
+        if not (next_instr >> 4):
+            self.emu.reg[0] = curr_instr & 0x0F
+            self.emu.reg[1] = next_instr & 0x0F
             self.emu.pc += 2
         else:
             raise ValueError
 
     def rcrdimm(self):
-        if not (self.emu.instr_mem[self.emu.pc+1] >> 4):
-            self.emu.reg[2] = self.emu.instr_mem[self.emu.pc] & 0x0F
-            self.emu.reg[3] = self.emu.instr_mem[self.emu.pc+1] & 0x0F
+        curr_instr = int(self.emu.instr_mem[self.emu.pc], 16)
+        next_instr = int(self.emu.instr_mem[self.emu.pc+1], 16)
+        if not (next_instr >> 4):
+            self.emu.reg[2] = curr_instr & 0x0F
+            self.emu.reg[3] = next_instr & 0x0F
             self.emu.pc += 2
         else:
             raise ValueError
 
     def accimm(self):
-        self.emu.acc = self.emu.instr_mem[self.emu.pc] & 0x0F
+        self.emu.acc = int(self.emu.instr_mem[self.emu.pc], 16) & 0x0F
         self.emu.pc += 1
 
     def branch(self):
-        imm = ((self.emu.instr_mem[self.emu.pc] & 0x07) << 8) | self.emu.instr_mem[self.emu.pc+1]
+        curr_instr = int(self.emu.instr_mem[self.emu.pc], 16)
+        next_instr = int(self.emu.instr_mem[self.emu.pc+1], 16)
+        imm = ((curr_instr & 0x07) << 8) | next_instr
         self.emu.pc = (self.emu.pc & 0xF800) | imm
 
     def bbitkimm(self):
-        kk = (self.emu.instr_mem[self.emu.pc] & 0x18) >> 3
+        kk = (int(self.emu.instr_mem[self.emu.pc], 16) & 0x18) >> 3
         accbitkk = (self.emu.acc >> kk) & 0x1
         if accbitkk == 1:
             self.branch()
@@ -410,7 +422,9 @@ class Arch242ISA:
             self.branch()
 
     def bimm(self):
-        imm = ((self.emu.instr_mem[self.emu.pc] & 0x0F) << 8) | self.emu.instr_mem[self.emu.pc+1]
+        curr_instr = int(self.emu.instr_mem[self.emu.pc], 16)
+        next_instr = int(self.emu.instr_mem[self.emu.pc+1], 16)
+        imm = ((curr_instr & 0x0F) << 8) | next_instr
         self.emu.pc = (self.emu.pc & 0xF000) | imm
 
     def callimm(self):
