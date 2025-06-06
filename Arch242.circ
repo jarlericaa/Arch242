@@ -26,6 +26,9 @@
       <a name="appearance" val="classic"/>
       <a name="facing" val="north"/>
     </tool>
+    <tool name="Probe">
+      <a name="radix" val="10unsigned"/>
+    </tool>
     <tool name="Tunnel">
       <a name="facing" val="north"/>
     </tool>
@@ -105,6 +108,10 @@
       <a name="label" val="HiNibble"/>
       <a name="width" val="4"/>
     </comp>
+    <comp lib="0" loc="(1020,250)" name="Probe">
+      <a name="appearance" val="NewPins"/>
+      <a name="radix" val="10unsigned"/>
+    </comp>
     <comp lib="0" loc="(1020,540)" name="Probe">
       <a name="appearance" val="NewPins"/>
     </comp>
@@ -122,6 +129,10 @@
     </comp>
     <comp lib="0" loc="(1070,440)" name="Probe">
       <a name="appearance" val="NewPins"/>
+    </comp>
+    <comp lib="0" loc="(1080,250)" name="Tunnel">
+      <a name="label" val="Inst"/>
+      <a name="width" val="8"/>
     </comp>
     <comp lib="0" loc="(1080,420)" name="Probe">
       <a name="appearance" val="NewPins"/>
@@ -821,9 +832,17 @@
       <a name="label" val="MemWriteData"/>
       <a name="width" val="4"/>
     </comp>
+    <comp lib="0" loc="(280,1020)" name="Probe">
+      <a name="appearance" val="NewPins"/>
+      <a name="radix" val="16"/>
+    </comp>
     <comp lib="0" loc="(280,1020)" name="Tunnel">
       <a name="label" val="InstWord_lo"/>
       <a name="width" val="8"/>
+    </comp>
+    <comp lib="0" loc="(280,890)" name="Probe">
+      <a name="appearance" val="NewPins"/>
+      <a name="radix" val="16"/>
     </comp>
     <comp lib="0" loc="(280,890)" name="Tunnel">
       <a name="label" val="InstWord_hi"/>
@@ -862,6 +881,14 @@
     <comp lib="0" loc="(490,360)" name="Tunnel">
       <a name="label" val="PC_Hi4"/>
       <a name="width" val="4"/>
+    </comp>
+    <comp lib="0" loc="(490,550)" name="Probe">
+      <a name="appearance" val="NewPins"/>
+      <a name="radix" val="10unsigned"/>
+    </comp>
+    <comp lib="0" loc="(510,530)" name="Probe">
+      <a name="appearance" val="NewPins"/>
+      <a name="radix" val="10unsigned"/>
     </comp>
     <comp lib="0" loc="(510,940)" name="Tunnel">
       <a name="facing" val="east"/>
@@ -954,10 +981,6 @@
     </comp>
     <comp lib="0" loc="(970,640)" name="Probe">
       <a name="appearance" val="NewPins"/>
-    </comp>
-    <comp lib="0" loc="(980,250)" name="Tunnel">
-      <a name="label" val="Inst"/>
-      <a name="width" val="8"/>
     </comp>
     <comp lib="0" loc="(980,620)" name="Probe">
       <a name="appearance" val="NewPins"/>
@@ -1106,6 +1129,7 @@
     <wire from="(1000,700)" to="(1110,700)"/>
     <wire from="(1010,560)" to="(1010,670)"/>
     <wire from="(1010,670)" to="(1110,670)"/>
+    <wire from="(1020,250)" to="(1080,250)"/>
     <wire from="(1020,540)" to="(1020,640)"/>
     <wire from="(1020,640)" to="(1110,640)"/>
     <wire from="(1030,520)" to="(1030,610)"/>
@@ -1439,11 +1463,13 @@
     <wire from="(460,340)" to="(470,340)"/>
     <wire from="(460,360)" to="(490,360)"/>
     <wire from="(460,510)" to="(550,510)"/>
-    <wire from="(460,530)" to="(520,530)"/>
-    <wire from="(460,550)" to="(520,550)"/>
+    <wire from="(460,530)" to="(510,530)"/>
+    <wire from="(460,550)" to="(490,550)"/>
     <wire from="(470,290)" to="(470,330)"/>
     <wire from="(470,330)" to="(470,340)"/>
     <wire from="(470,330)" to="(490,330)"/>
+    <wire from="(490,550)" to="(520,550)"/>
+    <wire from="(510,530)" to="(520,530)"/>
     <wire from="(510,940)" to="(540,940)"/>
     <wire from="(510,970)" to="(540,970)"/>
     <wire from="(520,530)" to="(520,540)"/>
@@ -1486,7 +1512,7 @@
     <wire from="(920,720)" to="(920,910)"/>
     <wire from="(920,910)" to="(1100,910)"/>
     <wire from="(940,200)" to="(940,250)"/>
-    <wire from="(940,250)" to="(980,250)"/>
+    <wire from="(940,250)" to="(1020,250)"/>
     <wire from="(940,700)" to="(940,880)"/>
     <wire from="(940,880)" to="(1110,880)"/>
     <wire from="(950,680)" to="(950,850)"/>
@@ -2091,9 +2117,8 @@
       <a name="addrWidth" val="16"/>
       <a name="appearance" val="logisim_evolution"/>
       <a name="contents">addr/data: 16 8
-67 72 5 68 5 67 1 71
-7 72 9 68 c 67 f 65
-0 5 37 3e
+71 b8 6 71 0 50 0 5
+37 3e
 </a>
     </comp>
     <wire from="(170,100)" to="(290,100)"/>
@@ -3652,6 +3677,10 @@
       <a name="label" val="CurInstCode"/>
       <a name="width" val="8"/>
     </comp>
+    <comp lib="0" loc="(250,220)" name="Probe">
+      <a name="appearance" val="NewPins"/>
+      <a name="radix" val="16"/>
+    </comp>
     <comp lib="0" loc="(260,1730)" name="Tunnel">
       <a name="label" val="addc_mba"/>
     </comp>
@@ -3829,6 +3858,14 @@
     <comp lib="0" loc="(370,680)" name="Probe">
       <a name="appearance" val="NewPins"/>
       <a name="facing" val="west"/>
+      <a name="radix" val="16"/>
+    </comp>
+    <comp lib="0" loc="(390,910)" name="Probe">
+      <a name="appearance" val="NewPins"/>
+      <a name="radix" val="16"/>
+    </comp>
+    <comp lib="0" loc="(390,950)" name="Probe">
+      <a name="appearance" val="NewPins"/>
       <a name="radix" val="16"/>
     </comp>
     <comp lib="0" loc="(470,1720)" name="Tunnel">
@@ -4586,20 +4623,27 @@
     <comp lib="3" loc="(250,1110)" name="Comparator">
       <a name="width" val="4"/>
     </comp>
-    <comp lib="3" loc="(440,760)" name="Comparator"/>
+    <comp lib="3" loc="(440,760)" name="Comparator">
+      <a name="mode" val="unsigned"/>
+    </comp>
     <comp lib="3" loc="(440,800)" name="Comparator">
+      <a name="mode" val="unsigned"/>
       <a name="width" val="4"/>
     </comp>
     <comp lib="3" loc="(440,840)" name="Comparator">
+      <a name="mode" val="unsigned"/>
       <a name="width" val="4"/>
     </comp>
     <comp lib="3" loc="(440,880)" name="Comparator">
+      <a name="mode" val="unsigned"/>
       <a name="width" val="4"/>
     </comp>
     <comp lib="3" loc="(440,920)" name="Comparator">
+      <a name="mode" val="unsigned"/>
       <a name="width" val="4"/>
     </comp>
     <comp lib="3" loc="(440,960)" name="Comparator">
+      <a name="mode" val="unsigned"/>
       <a name="width" val="4"/>
     </comp>
     <comp lib="3" loc="(530,1730)" name="Comparator"/>
@@ -4964,7 +5008,7 @@
     <wire from="(2080,400)" to="(2080,440)"/>
     <wire from="(210,190)" to="(210,210)"/>
     <wire from="(210,190)" to="(270,190)"/>
-    <wire from="(210,220)" to="(270,220)"/>
+    <wire from="(210,220)" to="(250,220)"/>
     <wire from="(210,510)" to="(220,510)"/>
     <wire from="(210,540)" to="(240,540)"/>
     <wire from="(210,570)" to="(220,570)"/>
@@ -5021,6 +5065,7 @@
     <wire from="(250,2020)" to="(260,2020)"/>
     <wire from="(250,2040)" to="(250,2080)"/>
     <wire from="(250,2040)" to="(260,2040)"/>
+    <wire from="(250,220)" to="(270,220)"/>
     <wire from="(250,2500)" to="(250,2540)"/>
     <wire from="(250,2540)" to="(260,2540)"/>
     <wire from="(250,2560)" to="(250,2600)"/>
@@ -5062,10 +5107,12 @@
     <wire from="(350,850)" to="(400,850)"/>
     <wire from="(350,870)" to="(400,870)"/>
     <wire from="(350,890)" to="(400,890)"/>
-    <wire from="(350,910)" to="(400,910)"/>
+    <wire from="(350,910)" to="(390,910)"/>
     <wire from="(350,930)" to="(400,930)"/>
-    <wire from="(350,950)" to="(400,950)"/>
+    <wire from="(350,950)" to="(390,950)"/>
     <wire from="(350,970)" to="(400,970)"/>
+    <wire from="(390,910)" to="(400,910)"/>
+    <wire from="(390,950)" to="(400,950)"/>
     <wire from="(440,760)" to="(550,760)"/>
     <wire from="(440,790)" to="(480,790)"/>
     <wire from="(440,850)" to="(480,850)"/>
@@ -5347,6 +5394,10 @@
       <a name="label" val="IncValue"/>
       <a name="width" val="16"/>
     </comp>
+    <comp lib="0" loc="(310,410)" name="Probe">
+      <a name="appearance" val="NewPins"/>
+      <a name="radix" val="16"/>
+    </comp>
     <comp lib="0" loc="(360,460)" name="Tunnel">
       <a name="facing" val="north"/>
       <a name="label" val="Clock"/>
@@ -5446,7 +5497,8 @@
     <wire from="(220,420)" to="(220,430)"/>
     <wire from="(220,420)" to="(230,420)"/>
     <wire from="(240,430)" to="(240,460)"/>
-    <wire from="(260,410)" to="(320,410)"/>
+    <wire from="(260,410)" to="(310,410)"/>
+    <wire from="(310,410)" to="(320,410)"/>
     <wire from="(320,370)" to="(320,410)"/>
     <wire from="(320,370)" to="(370,370)"/>
     <wire from="(360,410)" to="(360,460)"/>
@@ -6349,6 +6401,11 @@
       <a name="facing" val="east"/>
       <a name="label" val="CondTrue"/>
     </comp>
+    <comp lib="0" loc="(790,1220)" name="Probe">
+      <a name="appearance" val="NewPins"/>
+      <a name="facing" val="north"/>
+      <a name="radix" val="10unsigned"/>
+    </comp>
     <comp lib="0" loc="(790,1260)" name="Tunnel">
       <a name="facing" val="north"/>
       <a name="label" val="BranchType"/>
@@ -6512,7 +6569,8 @@
     <wire from="(760,1170)" to="(760,1240)"/>
     <wire from="(760,1170)" to="(770,1170)"/>
     <wire from="(780,1350)" to="(810,1350)"/>
-    <wire from="(790,1180)" to="(790,1260)"/>
+    <wire from="(790,1180)" to="(790,1220)"/>
+    <wire from="(790,1220)" to="(790,1260)"/>
     <wire from="(810,1140)" to="(850,1140)"/>
   </circuit>
 </project>
