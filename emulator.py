@@ -1,6 +1,11 @@
 import sys
 import pyxel
-from constants import *
+
+# display configurations
+CELL_DIM = 8
+NUM_ROWS = 10
+NUM_COLS = 20
+
 
 class Arch242Emulator:
     def __init__(self, instr_hex: list[str]):
@@ -55,15 +60,13 @@ class Arch242Emulator:
 
         self.running = True
         self.led_display_base = 192
-        pyxel.init(80, 160, title="Arch242 Emulator", fps=60)
+        pyxel.init(CELL_DIM * NUM_COLS, CELL_DIM * NUM_ROWS, title="Arch242 Emulator", fps=60)
         pyxel.run(self.update, self.draw)
 
     def update(self):
-        if self.running or self.pc >= len(self.instr_mem):
+        if self.running and self.pc < len(self.instr_mem):
             self.handle_input()
             self.process_instruction(self.instr_mem[self.pc])
-        else:
-            sys.exit("Program Complete")
 
     def draw(self):
         pyxel.cls(0)
