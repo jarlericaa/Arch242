@@ -2,8 +2,8 @@ init:
     call init_snake
 
 game_loop:
-    call handle_input
     call move_snake
+    call handle_input
     call check_collision
     call check_eat_food
     call draw_snake
@@ -31,6 +31,54 @@ init_snake:
 
 handle_input:
     from-ioa
+    to-reg 4 # store value of ioa to RE for retrieval
+    # check if not pressed
+    and 15
+    beqz continue_direction
+    b check_direction
+
+check_direction:
+    # check if up
+    from-reg 4
+    and 1
+    bnez move_up
+    # check if down
+    from-reg 4
+    and 2
+    bnez move_down
+    # check if left
+    from-reg 4
+    and 4
+    bnez move_left
+    # check if right
+    from-reg 4
+    and 8
+    bnez move_right
+
+continue_direction:
+    rarb 242
+    from-mba
+    to-reg 4
+    b check_direction
+
+move_up:
+    rarb 1
+    inc*-mba
+    ret
+
+move_down:
+    rarb 1
+    dec*-mba
+    ret
+
+move_left:
+    rarb 2
+    dec*-mba
+    ret
+
+move_right:
+    rarb 2
+    inc*-mba
     ret
 
 move_snake:
