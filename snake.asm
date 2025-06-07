@@ -10,32 +10,59 @@ game_loop:
     # call check_eat_food
     # call draw_score
     call draw_snake
+    call clear_tail
     b game_loop
 
 init_snake:
-    # set length
-    acc 3
-    rarb 0
-    to-mba
-    
     # hardcode to LED
     rarb 217
     acc 14
     to-mba
     
+    # set length
+    acc 3
+    rarb 0
+    to-mba
+    
+    # INITIALIZE SNAKE OF LENGTH 3
     # store address of each part of snake (row, col)
+    # head:
     rarb 1
     rcrd 2
     acc 5
     to-mba
     acc 3
     to-mdc
+
+    # segment 1:
     rarb 3
     rcrd 4
     acc 5
     to-mba
     acc 2
     to-mdc
+
+    # segment 2 (where the tail pointer is first pointed):
+    rarb 5
+    # store 5 to tail row pointer
+    from-reg 0
+    rcrd 0xff
+    to-mdc # store ra of row -> 0xff
+    from-reg 1
+    rcrd 0xfe
+    to-mdc # store rb of row -> 0xfe
+    # so, current addr of tail row: MEM[0xfe]:MEM[0xff]
+
+    # next, store 6 to tail col pointer
+    rcrd 6
+    from-reg 2
+    rarb 0xfd
+    to-mba # store ra of col -> 0xfd
+    from-reg 3
+    rarb 0xfc
+    to-mba # store rb of col -> 0xfc
+    # current addr of tail col: MEM[0xfc]:MEM[0xfd]
+
     rarb 5
     rcrd 6
     acc 5
@@ -358,6 +385,153 @@ draw_snake:
     ret
     # shutdown
 
+    clear_tail:
+    # first copmute the memory address of the tail 
+    # load the tail's row, then store it to rc
+    rcrd 0xfe
+    from-mdc
+    to-reg 1 # MEM[0xfe] -> rb
+    rcrd 0xff
+    from-mdc
+    to-reg 0 # MEM[0xff] -> ra
+    # ATP, RB:RA should hold the memory for the tail's row
+    from-mba
+    rcrd 0xfb
+    to-mdc # 0xfb = row of tail
+
+    # load the tail's col, thenn store it to re
+    rcrd 0xfc
+    from-mdc
+    to-reg 1 # MEM[0xfc] -> rb
+    rcrd 0xfd
+    from-mdc
+    to-reg 0 
+    # ATP, RB:RA should hold the memory for the tail's col
+    from-mba
+    to-reg 4 # re = col of tail
+    #load the row
+    rarb 0xfb
+    from-mba
+    to-reg 2 # rc = row of tail
+
+    # computing memory address given row, col
+    # LED_addr = 192 + row*5 + (col//4)
+
+    # input (assume na-load na yung row, col from memory):
+    # rc = segment's row
+    # re = segment's col
+
+    # store c -> SCRATCH A and 0 -> scratch B
+    acc 12
+    rarb 0x25
+    to-mba
+    acc 0
+    rarb 0x26
+    to-mba #MEM[0x25] -> c ; MEM[0x26] -> 0
+
+    #COMPUTING RA which is nasa MEM[0x26]
+    clr-cf
+    acc 5
+    to-reg 3 # RA = counter for ilang beses mag-add (starting: 5)
+    clear_segment_Compute_RA:
+        rarb 0x26
+        clr-cf
+        from-reg 2 # acc = row
+        add-mba # MEM[0x26] + row
+        to-mba
+        from-reg 2
+        dec*-reg 3 # ra-=1
+        bnez-cf clear_segment_Compute_RB
+        bnz-d clear_segment_Compute_RA
+        b clear_Done_multiply
+
+    clear_segment_Compute_RB:
+        rarb 0x25
+        acc 1
+        add-mba
+        to-mba
+        bnz-d clear_segment_Compute_RA
+
+    clear_Done_multiply:
+        from-reg 4
+        rot-r
+        rot-r
+        and 3 #acc = 
+        
+    clear_segment_Compute_RA2:
+        rarb 0x26
+        add-mba 
+        to-mba
+        bnez-cf clear_segment_Compute_RB2
+        b clear_Done_finally
+    
+    clear_segment_Compute_RB2:
+        rarb 0x25
+        acc 1
+        add-mba
+        to-mba
+
+    clear_Done_finally:
+        rcrd 0x25
+        from-mdc #acc = MEM[0x25] -> rb dapat
+        to-reg 1 
+
+        rcrd 0x26
+        from-mdc #acc = MEM[0x26] -> ra
+        to-reg 0
+    # ATP DAPAT RB:RA = LED ADDRESS NA
+    # store rb sa MEM[0x29]
+    rcrd 0x29 
+    from-reg 1
+    to-mdc
+
+    # store ra sa MEM[0x30]
+    rcrd 0x30
+    from-reg 0
+    to-mdc
+
+    from-reg 4 # acc = col
+    and 3 # acc = col and 3
+    rcrd 0x31
+    to-mdc 
+
+    # MASKING, which bit needs to be lit up
+    # load col and 3 sa acc
+    rcrd 0x31
+    from-mdc # acc = col and 3
+
+    # 11 -> 1110 14
+    # 10 -> 1101 13
+    # 01 -> 1011 11
+    # 00 -> 0111 7
+
+    clear_ZerothIsZero:
+        b-bit 0 clear_ZerothIsOne
+        cler_aOnethIsZero: #00
+            b-bit 1 cler_aOnethIsOne
+            acc 14
+            b clear_AfterBBit
+
+        cler_aOnethIsOne: #10
+            acc 11
+            b clear_AfterBBit
+
+    clear_ZerothIsOne:
+        clear_bOnethIsZero: #01
+            b-bit 1 clear_bOnethIsOne
+            acc 13
+            b clear_AfterBBit
+
+        clear_bOnethIsOne: #11
+            acc 7
+            b clear_AfterBBit
+    
+    clear_AfterBBit:
+
+        and*-mba # update the bits of the led, dapat mamamatay na yung ilaw
+    
+    ret
+
 bounds_collision:
     b restart
 
@@ -559,7 +733,6 @@ draw_6:
     to-mba
     rarb 226
     to-mba
-    rarb
     ret
 
 draw_7:
