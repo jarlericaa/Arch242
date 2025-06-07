@@ -77,7 +77,10 @@ class Arch242Emulator:
                     f.write(f"registers: {self.reg}\n")
                     f.write(f"{self.data_mem}\n")
                     f.write(f"0x25 (rb): {self.data_mem[0x25]}\n")
-                    f.write(f"0x26 (rb): {self.data_mem[0x26]}\n")
+                    f.write(f"0x26 (ra): {self.data_mem[0x26]}\n")
+                    f.write(f"0x27 (length): {self.data_mem[0x27]}\n")
+                    f.write(f"0x33 (rb): {self.data_mem[0x33]}\n")
+                    f.write(f"0x32 (ra): {self.data_mem[0x32]}\n")
                     f.write(f"\n")
 
     def draw(self):
