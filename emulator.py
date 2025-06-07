@@ -243,7 +243,7 @@ class Arch242ISA:
 
     def andmba(self):
         addr = self.emu.reg[1] << 4 | self.emu.reg[0]
-        self.emu.data_mem[addr] = (self.emu.acc | self.emu.data_mem[addr]) & 0x0F
+        self.emu.data_mem[addr] = (self.emu.acc & self.emu.data_mem[addr]) & 0x0F
         self.emu.pc += 1
 
     def xormba(self):
