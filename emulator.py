@@ -89,10 +89,12 @@ class Arch242Emulator:
                     pyxel.rect(col * CELL_DIM, row * CELL_DIM, CELL_DIM, CELL_DIM, 11)
 
     def read_input(self):
-        self.ioa = (int(pyxel.btn(pyxel.KEY_UP))     << 0 |
-                    int(pyxel.btn(pyxel.KEY_DOWN))   << 1 |
-                    int(pyxel.btn(pyxel.KEY_LEFT))   << 2 |
-                    int(pyxel.btn(pyxel.KEY_RIGHT))  << 3)
+        if pyxel.btn(pyxel.KEY_UP) or pyxel.btn(pyxel.KEY_DOWN) or pyxel.btn(pyxel.KEY_LEFT) or pyxel.btn(pyxel.KEY_RIGHT):
+            self.ioa = (int(pyxel.btn(pyxel.KEY_UP))     << 0 |
+                        int(pyxel.btn(pyxel.KEY_DOWN))   << 1 |
+                        int(pyxel.btn(pyxel.KEY_LEFT))   << 2 |
+                        int(pyxel.btn(pyxel.KEY_RIGHT))  << 3)
+            
         # if pyxel.btn(pyxel.KEY_UP):
         #     self.ioa = 1
         # elif pyxel.btn(pyxel.KEY_DOWN):
