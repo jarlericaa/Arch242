@@ -38,8 +38,25 @@ draw_snake:
     from-mdc # acc = 0x00
     rcrd 0x27
     to-mdc # MEM[0x27] = length ng snake
+    #store 0x00 sa temp registers: 0x32 (ra) 0x33(rb)
+    rarb 0x32
+    acc 0
+    to-mba
+    rarb 0x33
+    to-mba
 
     Build_segment:
+        # get current address na iddraw from 0x32 and 0x33
+        rcrd 0x32 #acc = MEM[0x32] = current ra
+        from-mdc
+        rarb 0x26
+        to-mba 
+
+        rcrd 0x33
+        from-mdc
+        rarb 0x25
+        to-mba
+
         Get_row:
             draw_snake_Compute_rowRA:
                 rarb 0x26
@@ -97,6 +114,13 @@ draw_snake:
                 #atp, rb:ra should be the address of the snake segment COL (0x01 to 0x24)
             from-mba # acc = col
             to-reg 4 # re = col by now plsss....
+            # store current segment position address for next loop
+            from-reg 0 # acc = ra
+            rcrd 0x32
+            to-mdc
+            from-reg 1
+            rcrd 0x33
+            to-mdc
         
         rarb 0x28 # get the row from MEM[0x28]
         from-mba
@@ -105,7 +129,7 @@ draw_snake:
         call draw_segment
         rcrd 0x27
         dec*-mdc # subtract 1 to the length hanggang maging 0
-        from-mdc # acc = length-1
+        from-mdc 
         bnez Build_segment # if di pa 0, continue building
     
     shutdown
