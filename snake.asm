@@ -39,6 +39,76 @@ check_collision:
 
 check_eat_food:
 
+draw_snake:
+    rcrd 0x00
+    from-mdc # acc = 0x00
+    rcrd 0x27
+    to-mdc # MEM[0x27] = length ng snake
+
+    Build_segment:
+        Get_row:
+            draw_snake_Compute_rowRA:
+                rarb 0x26
+                clr-cf
+                inc*-mba
+                bnez-cf draw_snake_Compute_rowRB
+                b draw_snake_Done_Compute_row
+
+            draw_snake_Compute_rowRB:
+                rarb 0x25
+                inc*-mba
+
+            draw_snake_Done_Compute_row:
+                rcrd 0x25
+                from-mdc # acc = 1st nibble ng address ng segment (rb)
+                to-reg 1
+
+                rcrd 0x26
+                from-mdc # acc = 2nd nibble ng address ng seg (ra)
+                to-reg 0
+                #atp, rb:ra should be the address of the snake segment ROW (0x01 to 0x24)
+            # store the row to rc
+            from-mba # acc  = row
+            rarb 0x28
+            to-mba # store the row muna sa MEM[0x28] kasi onti register xd
+
+        Get_col:
+            draw_snake_Compute_colRA:
+                rarb 0x26
+                clr-cf
+                inc*-mba
+                bnez-cf draw_snake_Compute_colRA
+                b draw_snake_Done_Compute_col
+            
+            draw_snake_Compute_colRB:
+                rarb 0x25
+                inc*-mba
+
+            draw_snake_Done_Compute_col:
+                rcrd 0x25
+                from-mdc # acc = 1st nibble ng address ng segment (rb)
+                to-reg 1 # hi!!!?
+
+                rcrd 0x26
+                from-mdc # acc = 2nd nibble ng address ng seg (ra)
+                to-reg 0
+                #atp, rb:ra should be the address of the snake segment COL (0x01 to 0x24)
+            from-mba # acc = col
+            to-reg 4 # re = col by now plsss....
+        
+        rarb 0x28 # get the row from MEM[0x28]
+        from-mba
+        to-reg 2 # rc = row
+
+        call draw_segment
+        rcrd 0x27
+        dec*-mdc # subtract 1 to the length hanggang maging 0
+        from-mdc # acc = length-1
+        beqz Build_segment # if di pa 0, continue building
+    
+    shutdown
+
+
 draw_segment: #draws one segment
     # computing memory address given row, col
     # LED_addr = 192 + row*5 + (col//4)
@@ -105,66 +175,6 @@ draw_segment: #draws one segment
         to-reg 0
     ret
     # ATP DAPAT RB:RA = LED ADDRESS NA
-
-draw_snake:
-    rcrd 0x00
-    from-mdc # acc = 0x00
-    to-reg 3 # RD = Length of snake
-
-    Build_segment:
-        Get_row:
-            draw_snake_Compute_rowRA:
-                rarb 0x26
-                clr-cf
-                inc*-mdc
-                bnez-cf draw_snake_Compute_rowRB
-                b draw_snake_Done_Compute_row
-
-            draw_snake_Compute_rowRB:
-                rarb 0x25
-                inc*-mba
-
-            draw_snake_Done_Compute_row:
-                rcrd 0x25
-                from-mdc # acc = 1st nibble ng address ng segment (rb)
-                to-reg 1
-
-                rcrd 0x26
-                from-mdc # acc = 2nd nibble ng address ng seg (ra)
-                to-reg 0
-                #atp, rb:ra should be the address of the snake segment ROW (0x01 to 0x24)
-            # store the row to rc
-            from-mba 
-            to-reg 2 # rc = row by now!!!! sana....
-        Get_col:
-            draw_snake_Compute_colRA:
-                rarb 0x26
-                clr-cf
-                inc*-mdc
-                bnez-cf draw_snake_Compute_colRA
-                b draw_snake_Done_Compute_col
-            
-            draw_snake_Compute_colRB:
-                rarb 0x25
-                inc*-mba
-
-            draw_snake_Done_Compute_col:
-                rcrd 0x25
-                from-mdc # acc = 1st nibble ng address ng segment (rb)
-                to-reg 1
-
-                rcrd 0x26
-                from-mdc # acc = 2nd nibble ng address ng seg (ra)
-                to-reg 0
-                #atp, rb:ra should be the address of the snake segment COL (0x01 to 0x24)
-            from-mba
-            to-reg 4 # re = col by now plsss....
-
-        call draw_segment
-        dec*-reg 3 # subtract 1 to the length hanggang maging 0
-        bnz-d Build_segment # if di pa 0, continue building
-    
-    ret
 
 
 map_to_led:
