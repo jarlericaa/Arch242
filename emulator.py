@@ -147,70 +147,70 @@ class Arch242ISA:
         self.emu.pc += 1
 
     def frommba(self):
-        addr = self.emu.reg[1] << 4 | self.emu.reg[0]
+        addr = (self.emu.reg[1] << 4) | self.emu.reg[0]
         self.emu.acc = self.emu.data_mem[addr] & 0x0F
         self.emu.pc += 1
 
     def tomba(self):
-        addr = self.emu.reg[1] << 4 | self.emu.reg[0]
+        addr = (self.emu.reg[1] << 4) | self.emu.reg[0]
         self.emu.data_mem[addr] = self.emu.acc
         self.emu.pc += 1
 
     def frommdc(self):
-        addr = self.emu.reg[3] << 4 | self.emu.reg[2]
+        addr = (self.emu.reg[3] << 4) | self.emu.reg[2]
         self.emu.acc = self.emu.data_mem[addr] & 0x0F
         self.emu.pc += 1
 
     def tomdc(self):
-        addr = self.emu.reg[3] << 4 | self.emu.reg[2]
+        addr = (self.emu.reg[3] << 4) | self.emu.reg[2]
         self.emu.data_mem[addr] = self.emu.acc
         self.emu.pc += 1
 
     def addcmba(self):
-        addr = self.emu.reg[1] << 4 | self.emu.reg[0]
+        addr = (self.emu.reg[1] << 4) | self.emu.reg[0]
         self.emu.acc += self.emu.data_mem[addr] + self.emu.cf
         self.emu.cf = 1 if self.emu.acc & 0x0F else 0
         self.emu.acc &= 0x0F
         self.emu.pc += 1
 
     def addmba(self):
-        addr = self.emu.reg[1] << 4 | self.emu.reg[0]
+        addr = (self.emu.reg[1] << 4) | self.emu.reg[0]
         self.emu.acc += self.emu.data_mem[addr]
         self.emu.cf = 1 if self.emu.acc & 0x0F else 0
         self.emu.acc &= 0x0F
         self.emu.pc += 1
 
     def subcmba(self):
-        addr = self.emu.reg[1] << 4 | self.emu.reg[0]
+        addr = (self.emu.reg[1] << 4) | self.emu.reg[0]
         self.emu.acc = self.emu.acc - self.emu.data_mem[addr] + self.emu.cf
         self.emu.cf = 1 if self.emu.acc < 0 else 0
         self.emu.acc &= 0x0F
         self.emu.pc += 1
 
     def submba(self):
-        addr = self.emu.reg[1] << 4 | self.emu.reg[0]
+        addr = (self.emu.reg[1] << 4) | self.emu.reg[0]
         self.emu.acc = self.emu.acc - self.emu.data_mem[addr]
         self.emu.cf = 1 if self.emu.acc < 0 else 0
         self.emu.acc &= 0x0F
         self.emu.pc += 1
 
     def incmba(self):
-        addr = self.emu.reg[1] << 4 | self.emu.reg[0]
+        addr = (self.emu.reg[1] << 4) | self.emu.reg[0]
         self.emu.data_mem[addr] = (self.emu.data_mem[addr] + 1) & 0xFF
         self.emu.pc += 1
 
     def decmba(self):
-        addr = self.emu.reg[1] << 4 | self.emu.reg[0]
+        addr = (self.emu.reg[1] << 4) | self.emu.reg[0]
         self.emu.data_mem[addr] = (self.emu.data_mem[addr] - 1) & 0xFF
         self.emu.pc += 1
 
     def incmdc(self):
-        addr = self.emu.reg[3] << 4 | self.emu.reg[2]
+        addr = (self.emu.reg[3] << 4) | self.emu.reg[2]
         self.emu.data_mem[addr] = (self.emu.data_mem[addr] + 1) & 0xFF
         self.emu.pc += 1
 
     def decmdc(self):
-        addr = self.emu.reg[3] << 4 | self.emu.reg[2]
+        addr = (self.emu.reg[3] << 4) | self.emu.reg[2]
         self.emu.data_mem[addr] = (self.emu.data_mem[addr] - 1) & 0xFF
         self.emu.pc += 1
 
@@ -227,32 +227,32 @@ class Arch242ISA:
         self.emu.pc += 1
 
     def andba(self):
-        addr = self.emu.reg[1] << 4 | self.emu.reg[0]
+        addr = (self.emu.reg[1] << 4) | self.emu.reg[0]
         self.emu.acc = (self.emu.acc & self.emu.data_mem[addr]) & 0x0F
         self.emu.pc += 1
 
     def xorba(self):
-        addr = self.emu.reg[1] << 4 | self.emu.reg[0]
+        addr = (self.emu.reg[1] << 4) | self.emu.reg[0]
         self.emu.acc = (self.emu.acc ^ self.emu.data_mem[addr]) & 0x0F
         self.emu.pc += 1
 
     def orba(self):
-        addr = self.emu.reg[1] << 4 | self.emu.reg[0]
+        addr = (self.emu.reg[1] << 4) | self.emu.reg[0]
         self.emu.acc = (self.emu.acc | self.emu.data_mem[addr]) & 0x0F
         self.emu.pc += 1
 
     def andmba(self):
-        addr = self.emu.reg[1] << 4 | self.emu.reg[0]
+        addr = (self.emu.reg[1] << 4) | self.emu.reg[0]
         self.emu.data_mem[addr] = (self.emu.acc & self.emu.data_mem[addr]) & 0x0F
         self.emu.pc += 1
 
     def xormba(self):
-        addr = self.emu.reg[1] << 4 | self.emu.reg[0]
+        addr = (self.emu.reg[1] << 4) | self.emu.reg[0]
         self.emu.data_mem[addr] = (self.emu.acc ^ self.emu.data_mem[addr]) & 0xFF
         self.emu.pc += 1
 
     def ormba(self):
-        addr = self.emu.reg[1] << 4 | self.emu.reg[0]
+        addr = (self.emu.reg[1] << 4) | self.emu.reg[0]
         self.emu.data_mem[addr] = (self.emu.acc | self.emu.data_mem[addr]) & 0xFF
         self.emu.pc += 1
 
