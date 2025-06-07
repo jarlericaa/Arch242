@@ -56,16 +56,27 @@ class Arch242Emulator:
         self.ioa = 0 # 4-bit register
 
         self.running = True
+        self.debugging = True
+        if self.debugging:
+            open("logs/debugging.txt", 'w').close()
         pyxel.init(CELL_DIM * NUM_COLS, CELL_DIM * NUM_ROWS, title="Arch242 Emulator", fps=60)
         pyxel.run(self.update, self.draw)
 
     def update(self):
         if self.running and self.pc < len(self.instr_mem):
             self.read_input()
+            if self.debugging:
+                with open("logs/debugging.txt", 'a') as f:
+                    f.write(f"PC: {self.pc}\n")
             self.process_instruction(self.instr_mem[self.pc])
-            print(self.data_mem)
-            print(f"acc: {self.acc}")
-            print(self.reg)
+            if self.debugging:
+                with open("logs/debugging.txt", 'a') as f:
+                    f.write(f"acc: {self.acc}\n")
+                    f.write(f"cf: {self.cf}\n")
+                    f.write(f"temp: {self.temp}\n")
+                    f.write(f"registers: {self.reg}\n")
+                    f.write(f"{self.data_mem}\n")
+                    f.write(f"\n")
 
     def draw(self):
         pyxel.cls(0)
@@ -93,46 +104,46 @@ class Arch242Emulator:
         try:
             if 0x50 <= instr <= 0x5F:
                 self.isa.rarbimm()
-                print("rarbimm")
+                # print("rarbimm")
             elif 0x60 <= instr <= 0x6F:
                 self.isa.rcrdimm()
-                print("rcrdimm")
+                # print("rcrdimm")
             elif 0x70 <= instr <= 0x7F:
                 self.isa.accimm()
-                print("accimm")
+                # print("accimm")
             elif 0x80 <= instr <= 0x9F:
                 self.isa.bbitkimm()
-                print("bbitkimm")
+                # print("bbitkimm")
             elif 0xA0 <= instr <= 0xA7:
                 self.isa.bnzaimm()
-                print("bnzaimm")
+                # print("bnzaimm")
             elif 0xA8 <= instr <= 0xAF:
                 self.isa.bnzbimm()
-                print("bnzbimm")
+                # print("bnzbimm")
             elif 0xB0 <= instr <= 0xB7:
                 self.isa.beqzimm()
-                print("beqzimm")
+                # print("beqzimm")
             elif 0xB8 <= instr <= 0xBF:
                 self.isa.bnezimm()
-                print("bnezimm")
+                # print("bnezimm")
             elif 0xC0 <= instr <= 0xC7:
                 self.isa.beqzcfimm()
-                print("beqzcfimm")
+                # print("beqzcfimm")
             elif 0xC8 <= instr <= 0xCF:
                 self.isa.bnezcfimm()
-                print("bnezcfimm")
+                # print("bnezcfimm")
             elif 0xD8 <= instr <= 0xDF:
                 self.isa.bnzdimm()
-                print("bnzdimm")
+                # print("bnzdimm")
             elif 0xE0 <= instr <= 0xEF:
                 self.isa.bimm()
-                print("bimm")
+                # print("bimm")
             elif 0xF0 <= instr <= 0xFF:
                 self.isa.callimm()
-                print("callimm")
+                # print("callimm")
             elif instr in self.dispatch_table:
                 self.dispatch_table[instr]()
-                print(self.dispatch_table[instr].__name__)
+                # print(self.dispatch_table[instr].__name__)
             else:
                 raise(KeyError)
         except (ValueError, KeyError) as e:
@@ -145,42 +156,66 @@ class Arch242ISA:
     def rotr(self):
         self.emu.acc = ((self.emu.acc >> 1) | ((self.emu.acc & 0x01) << 3)) & 0xF
         self.emu.pc += 1
+        if self.emu.debugging:
+            with open("logs/debugging.txt", 'a') as f:
+                f.write("rotr\n")
 
     def rotl(self):
         self.emu.acc = ((self.emu.acc << 1) | ((self.emu.acc >> 3) & 0x1)) & 0xF
         self.emu.pc += 1
+        if self.emu.debugging:
+            with open("logs/debugging.txt", 'a') as f:
+                f.write("rotl\n")
 
     def rotrc(self):
         temp = self.emu.cf
         self.emu.cf = self.emu.acc & 0x01
         self.emu.acc = (self.emu.acc >> 1) | (temp << 3) & 0xF
         self.emu.pc += 1
+        if self.emu.debugging:
+            with open("logs/debugging.txt", 'a') as f:
+                f.write("rotrc\n")
 
     def rotlc(self):
         temp = self.emu.cf
         self.emu.cf = self.emu.acc >> 3 & 0x01
         self.emu.acc = ((self.emu.acc << 1) | temp) & 0xF
         self.emu.pc += 1
+        if self.emu.debugging:
+            with open("logs/debugging.txt", 'a') as f:
+                f.write("rotlc\n")
 
     def frommba(self):
         addr = (self.emu.reg[1] << 4) | self.emu.reg[0]
         self.emu.acc = self.emu.data_mem[addr] & 0x0F
         self.emu.pc += 1
+        if self.emu.debugging:
+            with open("logs/debugging.txt", 'a') as f:
+                f.write("frommba\n")
 
     def tomba(self):
         addr = (self.emu.reg[1] << 4) | self.emu.reg[0]
         self.emu.data_mem[addr] = self.emu.acc
         self.emu.pc += 1
+        if self.emu.debugging:
+            with open("logs/debugging.txt", 'a') as f:
+                f.write("tomba\n")
 
     def frommdc(self):
         addr = (self.emu.reg[3] << 4) | self.emu.reg[2]
         self.emu.acc = self.emu.data_mem[addr] & 0x0F
         self.emu.pc += 1
+        if self.emu.debugging:
+            with open("logs/debugging.txt", 'a') as f:
+                f.write("frommdc\n")
 
     def tomdc(self):
         addr = (self.emu.reg[3] << 4) | self.emu.reg[2]
         self.emu.data_mem[addr] = self.emu.acc
         self.emu.pc += 1
+        if self.emu.debugging:
+            with open("logs/debugging.txt", 'a') as f:
+                f.write("tomdc\n")
 
     def addcmba(self):
         addr = (self.emu.reg[1] << 4) | self.emu.reg[0]
@@ -188,6 +223,9 @@ class Arch242ISA:
         self.emu.cf = 1 if self.emu.acc & 0x0F else 0
         self.emu.acc &= 0x0F
         self.emu.pc += 1
+        if self.emu.debugging:
+            with open("logs/debugging.txt", 'a') as f:
+                f.write("addcmba\n")
 
     def addmba(self):
         addr = (self.emu.reg[1] << 4) | self.emu.reg[0]
@@ -195,6 +233,9 @@ class Arch242ISA:
         self.emu.cf = 1 if self.emu.acc & 0x0F else 0
         self.emu.acc &= 0x0F
         self.emu.pc += 1
+        if self.emu.debugging:
+            with open("logs/debugging.txt", 'a') as f:
+                f.write("addmba\n")
 
     def subcmba(self):
         addr = (self.emu.reg[1] << 4) | self.emu.reg[0]
@@ -202,6 +243,9 @@ class Arch242ISA:
         self.emu.cf = 1 if self.emu.acc < 0 else 0
         self.emu.acc &= 0x0F
         self.emu.pc += 1
+        if self.emu.debugging:
+            with open("logs/debugging.txt", 'a') as f:
+                f.write("subcmba\n")
 
     def submba(self):
         addr = (self.emu.reg[1] << 4) | self.emu.reg[0]
@@ -209,99 +253,159 @@ class Arch242ISA:
         self.emu.cf = 1 if self.emu.acc < 0 else 0
         self.emu.acc &= 0x0F
         self.emu.pc += 1
+        if self.emu.debugging:
+            with open("logs/debugging.txt", 'a') as f:
+                f.write("submba\n")
 
     def incmba(self):
         addr = (self.emu.reg[1] << 4) | self.emu.reg[0]
         self.emu.data_mem[addr] = (self.emu.data_mem[addr] + 1) & 0xFF
         self.emu.pc += 1
+        if self.emu.debugging:
+            with open("logs/debugging.txt", 'a') as f:
+                f.write("incmba\n")
 
     def decmba(self):
         addr = (self.emu.reg[1] << 4) | self.emu.reg[0]
         self.emu.data_mem[addr] = (self.emu.data_mem[addr] - 1) & 0xFF
         self.emu.pc += 1
+        if self.emu.debugging:
+            with open("logs/debugging.txt", 'a') as f:
+                f.write("decmba\n")
 
     def incmdc(self):
         addr = (self.emu.reg[3] << 4) | self.emu.reg[2]
         self.emu.data_mem[addr] = (self.emu.data_mem[addr] + 1) & 0xFF
         self.emu.pc += 1
+        if self.emu.debugging:
+            with open("logs/debugging.txt", 'a') as f:
+                f.write("incmdc\n")
 
     def decmdc(self):
         addr = (self.emu.reg[3] << 4) | self.emu.reg[2]
         self.emu.data_mem[addr] = (self.emu.data_mem[addr] - 1) & 0xFF
         self.emu.pc += 1
+        if self.emu.debugging:
+            with open("logs/debugging.txt", 'a') as f:
+                f.write("decmdc\n")
 
     def increg(self):
         curr_instr = self.emu.instr_mem[self.emu.pc]
         curr_reg = (curr_instr & 0xE) >> 1
         self.emu.reg[curr_reg] = (self.emu.reg[curr_reg] + 1) & 0x0F
         self.emu.pc += 1
+        if self.emu.debugging:
+            with open("logs/debugging.txt", 'a') as f:
+                f.write(f"increg {curr_reg}\n")
 
     def decreg(self):
         curr_instr = self.emu.instr_mem[self.emu.pc]
         curr_reg = (curr_instr & 0x0E) >> 1
         self.emu.reg[curr_reg] = (self.emu.reg[curr_reg] - 1) & 0x0F
         self.emu.pc += 1
+        if self.emu.debugging:
+            with open("logs/debugging.txt", 'a') as f:
+                f.write(f"decreg {curr_reg}\n")
 
     def andba(self):
         addr = (self.emu.reg[1] << 4) | self.emu.reg[0]
         self.emu.acc = (self.emu.acc & self.emu.data_mem[addr]) & 0x0F
         self.emu.pc += 1
+        if self.emu.debugging:
+            with open("logs/debugging.txt", 'a') as f:
+                f.write("andba\n")
 
     def xorba(self):
         addr = (self.emu.reg[1] << 4) | self.emu.reg[0]
         self.emu.acc = (self.emu.acc ^ self.emu.data_mem[addr]) & 0x0F
         self.emu.pc += 1
+        if self.emu.debugging:
+            with open("logs/debugging.txt", 'a') as f:
+                f.write("xorba\n")
 
     def orba(self):
         addr = (self.emu.reg[1] << 4) | self.emu.reg[0]
         self.emu.acc = (self.emu.acc | self.emu.data_mem[addr]) & 0x0F
         self.emu.pc += 1
+        if self.emu.debugging:
+            with open("logs/debugging.txt", 'a') as f:
+                f.write("orba\n")
 
     def andmba(self):
         addr = (self.emu.reg[1] << 4) | self.emu.reg[0]
         self.emu.data_mem[addr] = (self.emu.acc & self.emu.data_mem[addr]) & 0xFF
         self.emu.pc += 1
+        if self.emu.debugging:
+            with open("logs/debugging.txt", 'a') as f:
+                f.write("andmba\n")
 
     def xormba(self):
         addr = (self.emu.reg[1] << 4) | self.emu.reg[0]
         self.emu.data_mem[addr] = (self.emu.acc ^ self.emu.data_mem[addr]) & 0xFF
         self.emu.pc += 1
+        if self.emu.debugging:
+            with open("logs/debugging.txt", 'a') as f:
+                f.write("xormba\n")
 
     def ormba(self):
         addr = (self.emu.reg[1] << 4) | self.emu.reg[0]
         self.emu.data_mem[addr] = (self.emu.acc | self.emu.data_mem[addr]) & 0xFF
         self.emu.pc += 1
+        if self.emu.debugging:
+            with open("logs/debugging.txt", 'a') as f:
+                f.write("ormba\n")
 
     def toreg(self):
         curr_reg = (self.emu.instr_mem[self.emu.pc] & 0x0E) >> 1
         self.emu.reg[curr_reg] = self.emu.acc
         self.emu.pc += 1
+        if self.emu.debugging:
+            with open("logs/debugging.txt", 'a') as f:
+                f.write(f"toreg {curr_reg}\n")
 
     def fromreg(self):
         curr_reg = (self.emu.instr_mem[self.emu.pc] & 0x0E) >> 1
         self.emu.acc = self.emu.reg[curr_reg]
         self.emu.pc += 1
+        if self.emu.debugging:
+            with open("logs/debugging.txt", 'a') as f:
+                f.write(f"fromreg {curr_reg}\n")
 
     def clrcf(self):
         self.emu.cf = 0
         self.emu.pc += 1
+        if self.emu.debugging:
+            with open("logs/debugging.txt", 'a') as f:
+                f.write("clrcf\n")
 
     def setcf(self):
         self.emu.cf = 1
         self.emu.pc += 1
+        if self.emu.debugging:
+            with open("logs/debugging.txt", 'a') as f:
+                f.write("setcf\n")
 
     def ret(self):
         self.emu.pc = (self.emu.pc & 0xF000) | (self.emu.temp & 0x0FFF)
         self.temp = 0
+        if self.emu.debugging:
+            with open("logs/debugging.txt", 'a') as f:
+                f.write("ret\n")
 
     def fromioa(self):
         self.emu.acc = self.emu.ioa
         self.emu.pc += 1
+        if self.emu.debugging:
+            with open("logs/debugging.txt", 'a') as f:
+                f.write("fromioa\n")
 
     def inc(self):
         self.emu.acc += 1
         self.emu.acc &= 0xF
         self.emu.pc += 1
+        if self.emu.debugging:
+            with open("logs/debugging.txt", 'a') as f:
+                f.write("inc\n")
 
     def bcd(self):
         if self.emu.acc >= 10 or self.emu.cf == 1:
@@ -309,10 +413,16 @@ class Arch242ISA:
             self.emu.acc &= 0x0F
             self.emu.cf = 1
         self.emu.pc += 1
+        if self.emu.debugging:
+            with open("logs/debugging.txt", 'a') as f:
+                f.write("bcd\n")
 
     def shutdown(self):
         if self.emu.instr_mem[self.emu.pc+1] == 0x3E:
             self.emu.running = False
+            if self.emu.debugging:
+                with open("logs/debugging.txt", 'a') as f:
+                    f.write("shutdown\n")
             pyxel.quit()
         else:
             raise KeyError
@@ -324,12 +434,19 @@ class Arch242ISA:
         self.emu.acc -= 1
         self.emu.acc &= 0x0F
         self.emu.pc += 1
+        if self.emu.debugging:
+            with open("logs/debugging.txt", 'a') as f:
+                f.write("dec\n")
 
     def addimm(self):
         next_instr = self.emu.instr_mem[self.emu.pc+1]
         if not (next_instr >> 4):
             self.emu.acc = self.emu.acc + (next_instr & 0x0F)
+            self.emu.acc &= 0xF
             self.emu.pc += 2
+            if self.emu.debugging:
+                with open("logs/debugging.txt", 'a') as f:
+                    f.write(f"addimm {next_instr & 0x0F}\n")
         else:
             raise ValueError
 
@@ -337,7 +454,11 @@ class Arch242ISA:
         next_instr = self.emu.instr_mem[self.emu.pc+1]
         if not (next_instr >> 4):
             self.emu.acc = self.emu.acc - (next_instr & 0x0F)
+            self.emu.acc &= 0xF
             self.emu.pc += 2
+            if self.emu.debugging:
+                with open("logs/debugging.txt", 'a') as f:
+                    f.write(f"subimm {next_instr & 0x0F}\n")
         else:
             raise ValueError
     
@@ -346,6 +467,9 @@ class Arch242ISA:
         if not (next_instr >> 4):
             self.emu.acc = self.emu.acc & (next_instr & 0x0F)
             self.emu.pc += 2
+            if self.emu.debugging:
+                with open("logs/debugging.txt", 'a') as f:
+                    f.write(f"andimm {next_instr & 0x0F}\n")
         else:
             raise ValueError
 
@@ -354,6 +478,9 @@ class Arch242ISA:
         if not (next_instr >> 4):
             self.emu.acc = self.emu.acc ^ (next_instr & 0x0F)
             self.emu.pc += 2
+            if self.emu.debugging:
+                with open("logs/debugging.txt", 'a') as f:
+                    f.write(f"xorimm {next_instr & 0x0F}\n")
         else:
             raise ValueError
 
@@ -362,6 +489,9 @@ class Arch242ISA:
         if not (next_instr >> 4):
             self.emu.acc = self.emu.acc | (next_instr & 0x0F)
             self.emu.pc += 2
+            if self.emu.debugging:
+                with open("logs/debugging.txt", 'a') as f:
+                    f.write(f"orimm {next_instr & 0x0F}\n")
         else:
             raise ValueError
 
@@ -370,6 +500,9 @@ class Arch242ISA:
         if not (next_instr >> 4):
             self.emu.reg[4] = next_instr & 0x0F
             self.emu.pc += 2
+            if self.emu.debugging:
+                with open("logs/debugging.txt", 'a') as f:
+                    f.write(f"r4imm {next_instr & 0x0F}\n")
         else:
             raise ValueError
 
@@ -380,6 +513,9 @@ class Arch242ISA:
             self.emu.reg[0] = curr_instr & 0x0F
             self.emu.reg[1] = next_instr & 0x0F
             self.emu.pc += 2
+            if self.emu.debugging:
+                with open("logs/debugging.txt", 'a') as f:
+                    f.write(f"rarbimm {((next_instr & 0x0F) << 4) | (curr_instr & 0x0F)}\n")
         else:
             raise ValueError
 
@@ -390,68 +526,131 @@ class Arch242ISA:
             self.emu.reg[2] = curr_instr & 0x0F
             self.emu.reg[3] = next_instr & 0x0F
             self.emu.pc += 2
+            if self.emu.debugging:
+                with open("logs/debugging.txt", 'a') as f:
+                    f.write(f"rcrdimm {((next_instr & 0x0F) << 4) | (curr_instr & 0x0F)}\n")
         else:
             raise ValueError
 
     def accimm(self):
         self.emu.acc = self.emu.instr_mem[self.emu.pc] & 0x0F
         self.emu.pc += 1
+        if self.emu.debugging:
+            with open("logs/debugging.txt", 'a') as f:
+                f.write(f"accimm {self.emu.instr_mem[self.emu.pc] & 0x0F}\n")
 
     def branch(self):
         curr_instr = self.emu.instr_mem[self.emu.pc]
         next_instr = self.emu.instr_mem[self.emu.pc+1]
         imm = ((curr_instr & 0x07) << 8) | next_instr
         self.emu.pc = (self.emu.pc & 0xF800) | imm
+        if self.emu.debugging:
+            with open("logs/debugging.txt", 'a') as f:
+                f.write(f"branched to {self.emu.pc}\n")
 
     def bbitkimm(self):
         kk = (self.emu.instr_mem[self.emu.pc] & 0x18) >> 3
         accbitkk = (self.emu.acc >> kk) & 0x1
+
+        if self.emu.debugging:
+            with open("logs/debugging.txt", 'a') as f:
+                f.write(f"bbitkimm kk={kk}\n")
+
         if accbitkk == 1:
             self.branch()
         else:
             self.emu.pc += 2
+            if self.emu.debugging:
+                with open("logs/debugging.txt", 'a') as f:
+                    f.write(f"did not branch\n")
 
     def bnzaimm(self):
         if self.emu.reg[0] != 0: # RA is nonzero
+            if self.emu.debugging:
+                with open("logs/debugging.txt", 'a') as f:
+                    f.write(f"bnzaimm\n")
             self.branch()
         else:
             self.emu.pc += 2
+            if self.emu.debugging:
+                with open("logs/debugging.txt", 'a') as f:
+                    f.write(f"did not branch\n")
+
 
     def bnzbimm(self):
         if self.emu.reg[1] != 0: # RB is nonzero
+            if self.emu.debugging:
+                with open("logs/debugging.txt", 'a') as f:
+                    f.write(f"bnzbimm\n")
             self.branch()
         else:
             self.emu.pc += 2
+            if self.emu.debugging:
+                with open("logs/debugging.txt", 'a') as f:
+                    f.write(f"did not branch\n")
 
     def beqzimm(self):
         if self.emu.acc == 0:
+            if self.emu.debugging:
+                with open("logs/debugging.txt", 'a') as f:
+                    f.write(f"beqzimm\n")
             self.branch()
         else:
             self.emu.pc += 2
+            if self.emu.debugging:
+                with open("logs/debugging.txt", 'a') as f:
+                    f.write(f"did not branch\n")
 
     def bnezimm(self):
         if self.emu.acc != 0:
+            if self.emu.debugging:
+                with open("logs/debugging.txt", 'a') as f:
+                    f.write(f"bnezimm\n")
             self.branch()
         else:
             self.emu.pc += 2
+            if self.emu.debugging:
+                with open("logs/debugging.txt", 'a') as f:
+                    f.write(f"did not branch\n")
 
     def beqzcfimm(self):
         if self.emu.cf == 0:
+            if self.emu.debugging:
+                with open("logs/debugging.txt", 'a') as f:
+                    f.write(f"beqzcfimm\n")
             self.branch()
         else:
             self.emu.pc += 2
+            if self.emu.debugging:
+                with open("logs/debugging.txt", 'a') as f:
+                    f.write(f"did not branch\n")
+
 
     def bnezcfimm(self):
         if self.emu.cf != 0:
+            if self.emu.debugging:
+                with open("logs/debugging.txt", 'a') as f:
+                    f.write(f"bnezcfimm\n")
             self.branch()
         else:
             self.emu.pc += 2
+            if self.emu.debugging:
+                with open("logs/debugging.txt", 'a') as f:
+                    f.write(f"did not branch\n")
+
 
     def bnzdimm(self):
         if self.emu.reg[3] != 0:
+            if self.emu.debugging:
+                with open("logs/debugging.txt", 'a') as f:
+                    f.write(f"bnzdimm\n")
             self.branch()
         else:
             self.emu.pc += 2
+            if self.emu.debugging:
+                with open("logs/debugging.txt", 'a') as f:
+                    f.write(f"did not branch\n")
+
 
     def bimm(self):
         curr_instr = self.emu.instr_mem[self.emu.pc]
@@ -459,8 +658,15 @@ class Arch242ISA:
         imm = ((curr_instr & 0x0F) << 8) | next_instr
         self.emu.pc = (self.emu.pc & 0xF000) | imm
 
+        if self.emu.debugging:
+            with open("logs/debugging.txt", 'a') as f:
+                f.write(f"bimm - jumped to {imm}\n")
+
     def callimm(self):
         self.emu.temp = self.emu.pc + 2
+        if self.emu.debugging:
+            with open("logs/debugging.txt", 'a') as f:
+                f.write(f"call - saved temp to {self.emu.temp}\n")
         self.bimm()
 
 if __name__ == "__main__":
