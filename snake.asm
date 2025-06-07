@@ -10,7 +10,7 @@ game_loop:
     b game_loop
 
 init_snake:
-    # store address of null terminator
+    # set length
     acc 4
     rarb 0
     to-mba
@@ -32,40 +32,6 @@ init_snake:
 handle_input:
     from-ioa
     ret
-
-move_snake:
-    rcrd 36
-    rarb 34
-    move_snake_base: # if ra is zero check if rb is also zero
-        bnz-a move_snake_loop
-    move_snake_base2: # if ra and rb are zero return to game_loop
-        bnz-b move_snake_loop
-        ret
-    move_snake_loop:
-        # update corresponding coordinate
-        from-mba
-        to-mdc
-        from-reg 0 # put ra to acc to check if need to subtract 1 from rb
-        dec*-reg 0 # decrement ra
-        beqz is_rb_zero_move # if ra is zero, check if rb is also zero
-        dec_rdrc_move:
-            from-reg 2 # put rc to acc to check if need to subtract 1 from rd
-            dec*-reg 2 # # if ra is nonzero decrement rdrc
-        beqz dec_rd_move # if rc is zero, decrement rd. note that rdrc will never be zero.
-        b move_snake_base # if rc is nonzero before decrementing then go back to snake_base
-        is_rb_zero_move:
-            bnz-b dec_rb_move
-            ret # if rb is also zero, then we can return to game loop
-        dec_rb_move:
-            dec*-reg 1
-            b dec_rdrc_move
-        dec_rd_move:
-            dec*-reg 3
-        b move_snake_base
-
-check_collision:
-
-check_eat_food:
 
 draw_snake:
     rcrd 0x00
@@ -258,6 +224,7 @@ draw_segment: #draws one segment
         or*-mba # update the bits of the led, dapat iilaw na yung dapat iilaw
 
 ret
+
 
 
 map_to_led:
