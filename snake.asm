@@ -35,6 +35,9 @@ init_snake:
     to-mba
     acc 1
     to-mdc
+    rarb 242
+    acc 8
+    to-mba
     ret
 
 handle_input:
@@ -71,12 +74,12 @@ continue_direction:
 
 move_up:
     rarb 1
-    inc*-mba
+    dec*-mba
     ret
 
 move_down:
     rarb 1
-    dec*-mba
+    inc*-mba
     ret
 
 move_left:
