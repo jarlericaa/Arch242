@@ -1,6 +1,7 @@
 init:
     call init_snake
-    call draw_snake
+    call draw_divider
+    call draw_0
 
 game_loop:
     call move_snake
@@ -16,6 +17,11 @@ init_snake:
     rarb 0
     to-mba
     
+    # hardcode to LED
+    rarb 217
+    acc 14
+    to-mba
+
     # store address of each part of snake (row, col)
     rarb 1
     rcrd 2
@@ -336,8 +342,42 @@ draw_snake:
     # shutdown
 
 
+draw_divider:
+    acc 1
+    rarb 195
+    to-mba
+    rarb 200
+    to-mba
+    rarb 205
+    to-mba
+    rarb 210
+    to-mba
+    rarb 215
+    to-mba
+    rarb 220
+    to-mba
+    rarb 225
+    to-mba
+    rarb 230
+    to-mba
+    rarb 235
+    to-mba
+    rarb 240
+    to-mba
+    ret
 
-map_to_led:
-    
-is_in_bounds:
-
+draw_0:
+    acc 8
+    rarb 205
+    or*-mba
+    rarb 210
+    or*-mba
+    rarb 215
+    or*-mba
+    rarb 220
+    or*-mba
+    rarb 225
+    or*-mba
+    rarb 230
+    or*-mba
+    ret
