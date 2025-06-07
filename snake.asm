@@ -8,6 +8,7 @@ game_loop:
     call handle_input
     # call check_collision
     # call check_eat_food
+    # call draw_score
     call draw_snake
     b game_loop
 
@@ -357,6 +358,15 @@ draw_snake:
     ret
     # shutdown
 
+bounds_collision:
+    b restart
+
+map_to_led:
+    
+is_in_bounds:
+
+restart:
+    b init
 
 draw_divider:
     acc 1
@@ -382,13 +392,222 @@ draw_divider:
     to-mba
     ret
 
+draw_0:
+    acc 8
+    rarb 205
+    or*-mba
+    rarb 210
+    or*-mba
+    rarb 215
+    or*-mba
+    rarb 220
+    or*-mba
+    rarb 225
+    or*-mba
+    rarb 230
+    or*-mba
+    acc 3
+    rarb 231
+    to-mba
+    rarb 206
+    to-mba
+    acc 2
+    rarb 226
+    to-mba
+    rarb 221
+    to-mba
+    rarb 216
+    to-mba
+    rarb 211
+    to-mba
+    ret
 
-bounds_collision:
-    b restart
+draw_1:
+    acc 1
+    rarb 206
+    to-mba
+    rarb 211
+    to-mba
+    rarb 216
+    to-mba
+    rarb 221
+    to-mba
+    rarb 226
+    to-mba
+    rarb 231
+    to-mba
+    ret
 
-map_to_led:
+draw_2:
+    acc 8
+    rarb 205
+    or*-mba
+    rarb 215
+    or*-mba
+    rarb 220
+    or*-mba
+    rarb 225
+    or*-mba
+    rarb 230
+    or*-mba
+    acc 3
+    rarb 206
+    to-mba
+    rarb 216
+    to-mba
+    rarb 231
+    to-mba
+    acc 2
+    rarb 211
+    ret
+
+draw_3:
+    acc 8
+    rarb 205
+    or*-mba
+    rarb 215
+    or*-mba
+    rarb 230
+    or*-mba
+    acc 3
+    rarb 206
+    to-mba
+    rarb 216
+    to-mba
+    rarb 231
+    to-mba
+    acc 2
+    rarb 211
+    to-mba
+    rarb 221
+    to-mba
+    rarb 226
+    to-mba
+    ret
+
+draw_4:
+    acc 8
+    rarb 205
+    or*-mba
+    rarb 210
+    or*-mba
+    rarb 215
+    or*-mba
+    acc 2
+    rarb 206
+    to-mba
+    rarb 211
+    to-mba
+    rarb 221
+    to-mba
+    rarb 226
+    to-mba
+    rarb 231
+    to-mba
+    acc 3
+    rarb 216
+    to-mba
+    ret
+
+draw_5:
+    acc 8
+    rarb 205
+    or*-mba
+    rarb 210
+    or*-mba
+    rarb 215
+    or*-mba
+    rarb 230
+    or*-mba
+    acc 3
+    rarb 206
+    to-mba
+    rarb 216
+    to-mba
+    rarb 231
+    to-mba
+    acc 2
+    rarb 221
+    to-mba
+    rarb 226
+    to-mba
+    ret
+
+draw_6:
+    acc 8
+    rarb 205
+    or*-mba
+    rarb 210
+    or*-mba
+    rarb 215
+    or*-mba
+    rarb 220
+    or*-mba
+    rarb 225
+    or*-mba
+    rarb 230
+    or*-mba
+    acc 3
+    rarb 206
+    to-mba
+    rarb 216
+    to-mba
+    rarb 231
+    to-mba
+    acc 2
+    rarb 221
+    to-mba
+    rarb 226
+    to-mba
+    rarb
+    ret
+
+draw_7:
+    acc 8
+    rarb 205
+    or*-mba
+    acc 3
+    rarb 206
+    to-mba
+    acc 2
+    rarb 211
+    to-mba
+    rarb 216
+    to-mba
+    rarb 221
+    to-mba
+    rarb 226
+    to-mba
+    rarb 231
+    to-mba
+    ret
+
+draw_8:
+    acc 8
+    rarb 205
+    or*-mba
+    rarb 210
+    or*-mba
+    rarb 215
+    or*-mba
+    rarb 220
+    or*-mba
+    rarb 225
+    or*-mba
+    rarb 230
+    or*-mba
+    ret
     
-is_in_bounds:
+draw_9:
 
-restart:
-    b init
+draw_10:
+
+draw_11:
+
+draw_12:
+
+draw_13:
+
+draw_14:
+
+draw_15:
