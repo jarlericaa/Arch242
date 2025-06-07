@@ -1,31 +1,39 @@
 init:
     call init_snake
+    call draw_snake
 
 game_loop:
     call move_snake
     call handle_input
-    call check_collision
-    call check_eat_food
+    # call check_collision
+    # call check_eat_food
     call draw_snake
     b game_loop
 
 init_snake:
     # set length
-    acc 4
+    acc 3
     rarb 0
     to-mba
     
     # store address of each part of snake (row, col)
     rarb 1
     rcrd 2
-    acc 0
+    acc 5
     to-mba
+    acc 3
     to-mdc
+    rarb 3
     rcrd 4
-    acc 1
-    to-mdc
-    rcrd 6
+    acc 5
+    to-mba
     acc 2
+    to-mdc
+    rarb 5
+    rcrd 6
+    acc 5
+    to-mba
+    acc 1
     to-mdc
     ret
 
@@ -209,8 +217,8 @@ draw_snake:
         dec*-mdc # subtract 1 to the length hanggang maging 0
         from-mdc 
         bnez Build_segment # if di pa 0, continue building
-    
-    shutdown
+    ret
+    # shutdown
 
 
 draw_segment: #draws one segment
