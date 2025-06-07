@@ -74,21 +74,37 @@ continue_direction:
 
 move_up:
     rarb 1
+    from-mba    # ACC = old head row
+    beqz bounds_collision    # if head row is at 0 and we go up pa, collision!
+    
     dec*-mba
     ret
 
 move_down:
     rarb 1
+    from-mba    # ACC = old head row
+
+    sub 9  # ACC = old head row - 9
+    beqz bounds_collision   # if ACC = 0, then old head row was 9, so if we go down pa, collision!
+    
     inc*-mba
     ret
 
 move_left:
     rarb 2
+    from-mba    # ACC = old head col
+    beqz bounds_collision    # if head col is at 0 and we go left pa, collision!
+
     dec*-mba
     ret
 
 move_right:
     rarb 2
+    from-mba    # ACC = old head col
+
+    sub 11  # ACC = old head row - 11
+    beqz bounds_collision   # if ACC = 0, then old head row col 11, so if we go right pa, collision!
+    
     inc*-mba
     ret
 
@@ -337,7 +353,12 @@ draw_snake:
 
 
 
+bounds_collision:
+    b restart
+
 map_to_led:
     
 is_in_bounds:
 
+restart:
+    b init

@@ -59,7 +59,7 @@ class Arch242Emulator:
         self.debugging = True
         if self.debugging:
             open("logs/debugging.txt", 'w').close()
-        pyxel.init(CELL_DIM * NUM_COLS, CELL_DIM * NUM_ROWS, title="Arch242 Emulator", fps=60)
+        pyxel.init(CELL_DIM * NUM_COLS, CELL_DIM * NUM_ROWS, title="Arch242 Emulator", fps=1000)
         pyxel.run(self.update, self.draw)
 
     def update(self):
