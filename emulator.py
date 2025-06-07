@@ -534,10 +534,10 @@ class Arch242ISA:
 
     def accimm(self):
         self.emu.acc = self.emu.instr_mem[self.emu.pc] & 0x0F
-        self.emu.pc += 1
         if self.emu.debugging:
             with open("logs/debugging.txt", 'a') as f:
                 f.write(f"accimm {self.emu.instr_mem[self.emu.pc] & 0x0F}\n")
+        self.emu.pc += 1
 
     def branch(self):
         curr_instr = self.emu.instr_mem[self.emu.pc]
