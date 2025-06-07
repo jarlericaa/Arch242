@@ -216,13 +216,13 @@ class Arch242ISA:
 
     def increg(self):
         curr_instr = self.emu.instr_mem[self.emu.pc]
-        curr_reg = curr_instr & 0xE >> 1
+        curr_reg = (curr_instr & 0xE) >> 1
         self.emu.reg[curr_reg] = (self.emu.reg[curr_reg] + 1) & 0xFF
         self.emu.pc += 1
 
     def decreg(self):
         curr_instr = self.emu.instr_mem[self.emu.pc]
-        curr_reg = curr_instr & 0x0E >> 1
+        curr_reg = (curr_instr & 0x0E) >> 1
         self.emu.reg[curr_reg] = (self.emu.reg[curr_reg] - 1) & 0xFF
         self.emu.pc += 1
 
