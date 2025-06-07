@@ -78,13 +78,17 @@ draw_snake:
             draw_snake_Compute_rowRA:
                 rarb 0x26
                 clr-cf
-                inc*-mba
+                acc 1
+                add-mba
+                to-mba
                 bnez-cf draw_snake_Compute_rowRB
                 b draw_snake_Done_Compute_row
 
             draw_snake_Compute_rowRB:
                 rarb 0x25
-                inc*-mba
+                acc 1
+                add-mba
+                to-mba
 
             draw_snake_Done_Compute_row:
                 rcrd 0x25
@@ -104,13 +108,17 @@ draw_snake:
             draw_snake_Compute_colRA:
                 rarb 0x26
                 clr-cf
-                inc*-mba
+                acc 1
+                add-mba
+                to-mba
                 bnez-cf draw_snake_Compute_colRA
                 b draw_snake_Done_Compute_col
             
             draw_snake_Compute_colRB:
                 rarb 0x25
-                inc*-mba
+                acc 1
+                add-mba
+                to-mba
 
             draw_snake_Done_Compute_col:
                 rcrd 0x25
@@ -172,7 +180,9 @@ draw_segment: #draws one segment
 
     draw_segment_Compute_RB:
         rarb 0x25
-        inc*-mba
+        acc 1
+        add-mba
+        to-mba
         bnz-d draw_segment_Compute_RA
 
     Done_multiply:
@@ -190,7 +200,9 @@ draw_segment: #draws one segment
     
     draw_segment_Compute_RB2:
         rarb 0x25
-        inc*-mba
+        acc 1
+        add-mba
+        to-mba
 
     Done_finally:
         rcrd 0x25
