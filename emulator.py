@@ -224,7 +224,7 @@ class Arch242ISA:
     def addcmba(self):
         addr = (self.emu.reg[1] << 4) | self.emu.reg[0]
         self.emu.acc += self.emu.data_mem[addr] + self.emu.cf
-        self.emu.cf = 1 if self.emu.acc & 0x0F else 0
+        self.emu.cf = 1 if self.emu.acc > 15 else 0
         self.emu.acc &= 0x0F
         self.emu.pc += 1
         if self.emu.debugging:
@@ -234,7 +234,7 @@ class Arch242ISA:
     def addmba(self):
         addr = (self.emu.reg[1] << 4) | self.emu.reg[0]
         self.emu.acc += self.emu.data_mem[addr]
-        self.emu.cf = 1 if self.emu.acc & 0x0F else 0
+        self.emu.cf = 1 if self.emu.acc > 15 else 0
         self.emu.acc &= 0x0F
         self.emu.pc += 1
         if self.emu.debugging:
