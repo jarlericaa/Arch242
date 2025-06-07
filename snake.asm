@@ -43,8 +43,8 @@ move_snake:
         ret
     move_snake_loop:
         # update corresponding coordinate
-        from-mdc
-        to-mba
+        from-mba
+        to-mdc
         from-reg 0 # put ra to acc to check if need to subtract 1 from rb
         dec*-reg 0 # decrement ra
         beqz is_rb_zero_move # if ra is zero, check if rb is also zero
