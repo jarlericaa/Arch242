@@ -89,16 +89,20 @@ class Arch242Emulator:
                     pyxel.rect(col * CELL_DIM, row * CELL_DIM, CELL_DIM, CELL_DIM, 11)
 
     def read_input(self):
-        if pyxel.btn(pyxel.KEY_UP):
-            self.ioa = 1
-        elif pyxel.btn(pyxel.KEY_DOWN):
-            self.ioa = 2
-        elif pyxel.btn(pyxel.KEY_LEFT):
-            self.ioa = 4
-        elif pyxel.btn(pyxel.KEY_RIGHT):
-            self.ioa = 8
-        else:
-            self.ioa = 0
+        self.ioa = (int(pyxel.btn(pyxel.KEY_UP))     << 0 |
+                    int(pyxel.btn(pyxel.KEY_DOWN))   << 1 |
+                    int(pyxel.btn(pyxel.KEY_LEFT))   << 2 |
+                    int(pyxel.btn(pyxel.KEY_RIGHT))  << 3)
+        # if pyxel.btn(pyxel.KEY_UP):
+        #     self.ioa = 1
+        # elif pyxel.btn(pyxel.KEY_DOWN):
+        #     self.ioa = 2
+        # elif pyxel.btn(pyxel.KEY_LEFT):
+        #     self.ioa = 4
+        # elif pyxel.btn(pyxel.KEY_RIGHT):
+        #     self.ioa = 8
+        # else:
+        #     self.ioa = 0
 
     def process_instruction(self, instr: int):
         try:
