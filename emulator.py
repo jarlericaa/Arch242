@@ -45,7 +45,6 @@ class Arch242Emulator:
             0x21: self.isa.fromreg, 0x23: self.isa.fromreg, 0x25: self.isa.fromreg,
             0x27: self.isa.fromreg, 0x29: self.isa.fromreg,
         }
-
         self.pc = 0
         self.instr_mem = list(map(lambda x: int(x, 16), instr_hex)) # 16-bit wide
         self.data_mem = bytearray(256) # 8-bit wide
@@ -392,34 +391,50 @@ class Arch242ISA:
         accbitkk = (self.emu.acc >> kk) & 0x1
         if accbitkk == 1:
             self.branch()
+        else:
+            self.emu.pc += 2
 
     def bnzaimm(self):
         if self.emu.reg[0] != 0: # RA is nonzero
             self.branch()
+        else:
+            self.emu.pc += 2
 
     def bnzbimm(self):
         if self.emu.reg[1] != 0: # RB is nonzero
             self.branch()
+        else:
+            self.emu.pc += 2
 
     def beqzimm(self):
         if self.emu.acc == 0:
             self.branch()
+        else:
+            self.emu.pc += 2
 
     def bnezimm(self):
         if self.emu.acc != 0:
             self.branch()
+        else:
+            self.emu.pc += 2
 
     def beqzcfimm(self):
         if self.emu.cf == 0:
             self.branch()
+        else:
+            self.emu.pc += 2
 
     def bnezcfimm(self):
         if self.emu.cf != 0:
             self.branch()
+        else:
+            self.emu.pc += 2
 
     def bnzdimm(self):
         if self.emu.reg[3] != 0:
             self.branch()
+        else:
+            self.emu.pc += 2
 
     def bimm(self):
         curr_instr = self.emu.instr_mem[self.emu.pc]
