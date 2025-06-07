@@ -63,6 +63,9 @@ class Arch242Emulator:
         if self.running and self.pc < len(self.instr_mem):
             self.read_input()
             self.process_instruction(self.instr_mem[self.pc])
+            print(self.data_mem)
+            print(f"acc: {self.acc}")
+            print(self.reg)
 
     def draw(self):
         pyxel.cls(0)
@@ -90,46 +93,46 @@ class Arch242Emulator:
         try:
             if 0x50 <= instr <= 0x5F:
                 self.isa.rarbimm()
-                # print("rarbimm")
+                print("rarbimm")
             elif 0x60 <= instr <= 0x6F:
                 self.isa.rcrdimm()
-                # print("rcrdimm")
+                print("rcrdimm")
             elif 0x70 <= instr <= 0x7F:
                 self.isa.accimm()
-                # print("accimm")
+                print("accimm")
             elif 0x80 <= instr <= 0x9F:
                 self.isa.bbitkimm()
-                # print("bbitkimm")
+                print("bbitkimm")
             elif 0xA0 <= instr <= 0xA7:
                 self.isa.bnzaimm()
-                # print("bnzaimm")
+                print("bnzaimm")
             elif 0xA8 <= instr <= 0xAF:
                 self.isa.bnzbimm()
-                # print("bnzbimm")
+                print("bnzbimm")
             elif 0xB0 <= instr <= 0xB7:
                 self.isa.beqzimm()
-                # print("beqzimm")
+                print("beqzimm")
             elif 0xB8 <= instr <= 0xBF:
                 self.isa.bnezimm()
-                # print("bnezimm")
+                print("bnezimm")
             elif 0xC0 <= instr <= 0xC7:
                 self.isa.beqzcfimm()
-                # print("beqzcfimm")
+                print("beqzcfimm")
             elif 0xC8 <= instr <= 0xCF:
                 self.isa.bnezcfimm()
-                # print("bnezcfimm")
+                print("bnezcfimm")
             elif 0xD8 <= instr <= 0xDF:
                 self.isa.bnzdimm()
-                # print("bnzdimm")
+                print("bnzdimm")
             elif 0xE0 <= instr <= 0xEF:
                 self.isa.bimm()
-                # print("bimm")
+                print("bimm")
             elif 0xF0 <= instr <= 0xFF:
                 self.isa.callimm()
-                # print("callimm")
+                print("callimm")
             elif instr in self.dispatch_table:
                 self.dispatch_table[instr]()
-                # print(self.dispatch_table[instr].__name__)
+                print(self.dispatch_table[instr].__name__)
             else:
                 raise(KeyError)
         except (ValueError, KeyError) as e:
