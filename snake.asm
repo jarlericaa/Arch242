@@ -1,14 +1,14 @@
 init:
     call init_snake
     call draw_divider
-    call draw_0
+    call draw_score
 
 game_loop:
     call move_snake
     call handle_input
     # call check_collision
     # call check_eat_food
-    # call draw_score
+    call draw_score
     call draw_snake
     call clear_tail
     b game_loop
@@ -63,12 +63,15 @@ init_snake:
     to-mba # store rb of col -> 0xfc
     # current addr of tail col: MEM[0xfc]:MEM[0xfd]
 
+    # segment 3
     rarb 5
     rcrd 6
     acc 5
     to-mba
     acc 1
     to-mdc
+
+    # set initial direction
     rarb 242
     acc 8
     to-mba
@@ -535,12 +538,60 @@ draw_snake:
 bounds_collision:
     b restart
 
-map_to_led:
-    
-is_in_bounds:
-
 restart:
     b init
+
+draw_score:
+    rarb 243
+    from-mba
+    to-reg 4
+    xor 0
+    beqz draw_0
+    from-reg 4
+    xor 1
+    beqz draw_1
+    from-reg 4
+    xor 2
+    beqz draw_2
+    from-reg 4
+    xor 3
+    beqz draw_3
+    from-reg 4
+    xor 4
+    beqz draw_4
+    from-reg 4
+    xor 5
+    beqz draw_5
+    from-reg 4
+    xor 6
+    beqz draw_6
+    from-reg 4
+    xor 7
+    beqz draw_7
+    from-reg 4
+    xor 8
+    beqz draw_8
+    from-reg 4
+    xor 9
+    beqz draw_9
+    from-reg 4
+    xor 10
+    beqz draw_10
+    from-reg 4
+    xor 11
+    beqz draw_11
+    from-reg 4
+    xor 12
+    beqz draw_12
+    from-reg 4
+    xor 13
+    beqz draw_13
+    from-reg 4
+    xor 14
+    beqz draw_14
+    from-reg 4
+    xor 15
+    beqz draw_15
 
 draw_divider:
     acc 1
