@@ -459,6 +459,7 @@ draw_2:
     to-mba
     acc 2
     rarb 211
+    to-mba
     ret
 
 draw_3:
@@ -559,7 +560,6 @@ draw_6:
     to-mba
     rarb 226
     to-mba
-    rarb
     ret
 
 draw_7:
@@ -596,18 +596,249 @@ draw_8:
     or*-mba
     rarb 230
     or*-mba
+    acc 3
+    rarb 206
+    to-mba
+    rarb 216
+    to-mba
+    rarb 231
+    to-mba
+    acc 2
+    rarb 211
+    to-mba
+    rarb 221
+    to-mba
+    rarb 226
+    to-mba
     ret
-    
+
 draw_9:
+    acc 8
+    rarb 205
+    or*-mba
+    rarb 210
+    or*-mba
+    rarb 215
+    or*-mba
+    acc 3
+    rarb 206
+    to-mba
+    rarb 216
+    to-mba
+    acc 2
+    rarb 211
+    to-mba
+    rarb 221
+    to-mba
+    rarb 226
+    to-mba
+    rarb 231
+    to-mba
+    ret
 
 draw_10:
+    acc 4
+    rarb 205
+    or*-mba
+    rarb 210
+    or*-mba
+    rarb 215
+    or*-mba
+    rarb 220
+    or*-mba
+    rarb 225
+    or*-mba
+    rarb 230
+    or*-mba
+    acc 7
+    rarb 206
+    to-mba
+    rarb 231
+    to-mba
+    acc 5
+    rarb 211
+    to-mba
+    rarb 216
+    to-mba
+    rarb 221
+    to-mba
+    rarb 226
+    to-mba
+    ret
 
 draw_11:
+    acc 8
+    rarb 205
+    or*-mba
+    rarb 210
+    or*-mba
+    rarb 215
+    or*-mba
+    rarb 220
+    or*-mba
+    rarb 225
+    or*-mba
+    rarb 230
+    or*-mba
+    acc 2
+    rarb 206
+    to-mba
+    rarb 211
+    to-mba
+    rarb 216
+    to-mba
+    rarb 221
+    to-mba
+    rarb 226
+    to-mba
+    rarb 231
+    to-mba
+    ret
 
 draw_12:
+    acc 4
+    rarb 205
+    or*-mba
+    rarb 210
+    or*-mba
+    rarb 215
+    or*-mba
+    rarb 220
+    or*-mba
+    rarb 225
+    or*-mba
+    rarb 230
+    or*-mba
+    acc 7
+    rarb 206
+    to-mba
+    rarb 216
+    to-mba
+    rarb 231
+    to-mba
+    acc 4
+    rarb 211
+    to-mba
+    acc 1
+    rarb 221
+    to-mba
+    rarb 226
+    to-mba
+    ret
 
 draw_13:
+    acc 4
+    rarb 205
+    or*-mba
+    rarb 210
+    or*-mba
+    rarb 215
+    or*-mba
+    rarb 220
+    or*-mba
+    rarb 225
+    or*-mba
+    rarb 230
+    or*-mba
+    acc 7
+    rarb 206
+    to-mba
+    rarb 216
+    to-mba
+    rarb 231
+    to-mba
+    acc 4
+    rarb 211
+    to-mba
+    rarb 221
+    to-mba
+    rarb 226
+    to-mba
+    ret
 
 draw_14:
+    acc 4
+    rarb 205
+    or*-mba
+    rarb 210
+    or*-mba
+    rarb 215
+    or*-mba
+    rarb 220
+    or*-mba
+    rarb 225
+    or*-mba
+    rarb 230
+    or*-mba
+    acc 5
+    rarb 206
+    to-mba
+    rarb 211
+    to-mba
+    acc 7
+    rarb 216
+    to-mba
+    acc 4
+    rarb 221
+    to-mba
+    rarb 226
+    to-mba
+    rarb 231
+    to-mba
+    ret
 
 draw_15:
+    acc 4
+    rarb 205
+    or*-mba
+    rarb 210
+    or*-mba
+    rarb 215
+    or*-mba
+    rarb 220
+    or*-mba
+    rarb 225
+    or*-mba
+    rarb 230
+    or*-mba
+    acc 7
+    rarb 206
+    to-mba
+    rarb 216
+    to-mba
+    rarb 231
+    to-mba
+    acc 1
+    rarb 211
+    to-mba
+    acc 4
+    rarb 221
+    to-mba
+    rarb 226
+    to-mba
+    ret
+
+clear_scoreboard:
+    b draw_divider
+    acc 0
+    rarb 196
+    to-mba
+    rarb 201
+    to-mba
+    rarb 206
+    to-mba
+    rarb 211
+    to-mba
+    rarb 216
+    to-mba
+    rarb 221
+    to-mba
+    rarb 226
+    to-mba
+    rarb 231
+    to-mba
+    rarb 236
+    to-mba
+    rarb 241
+    to-mba
+    ret
