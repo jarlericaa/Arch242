@@ -56,10 +56,10 @@ class Arch242Emulator:
         self.ioa = 0 # 4-bit register
 
         self.running = True
-        self.debugging = True
+        self.debugging = False
         if self.debugging:
             open("logs/debugging.txt", 'w').close()
-        pyxel.init(CELL_DIM * NUM_COLS, CELL_DIM * NUM_ROWS, title="Arch242 Emulator", fps=60)
+        pyxel.init(CELL_DIM * NUM_COLS, CELL_DIM * NUM_ROWS, title="Arch242 Emulator", fps=1000)
         pyxel.run(self.update, self.draw)
 
     def update(self):
@@ -91,7 +91,10 @@ class Arch242Emulator:
             for bit in range(4):
                 col = ((addr - 192) * 4 + bit) % 20
                 if val & (1 << bit):
-                    pyxel.rect(col * CELL_DIM, row * CELL_DIM, CELL_DIM, CELL_DIM, 11)
+                    if bit == 0 and addr in [195, 200, 205, 210, 215, 220, 225, 230, 235, 240]:
+                        pyxel.rect(col * CELL_DIM, row * CELL_DIM, CELL_DIM, CELL_DIM, 12)
+                    else:
+                        pyxel.rect(col * CELL_DIM, row * CELL_DIM, CELL_DIM, CELL_DIM, 11)
 
     def read_input(self):
         if pyxel.btn(pyxel.KEY_UP) or pyxel.btn(pyxel.KEY_DOWN) or pyxel.btn(pyxel.KEY_LEFT) or pyxel.btn(pyxel.KEY_RIGHT):
