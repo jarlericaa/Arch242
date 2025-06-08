@@ -1095,6 +1095,42 @@ food_collision:
             NULL_Done_Compute_col:
 
     # --------------------------
+
+    spawn_food:
+        # food_row = rotl(food_row + head_row + tail_col) & 0x8 + 1
+        rcrd 0xfd
+        from-mdc
+        to-reg 0
+        rarb 0xfc
+        from-mdc
+        to-reg 1
+        addc-mba
+        rarb 0x01
+        addc-mba
+        rarb 0xf4
+        addc-mba
+        rot-l
+        and 8
+        add 1
+        rarb 0xf4
+        to-mba
+        
+        # food_col = (food_col + head_col + tail_row) & 0x8 + 2
+        rcrd 0xff
+        from-mdc
+        to-reg 0
+        rarb 0xfe
+        from-mdc
+        to-reg 1
+        addc-mba
+        rarb 0x02
+        addc-mba
+        rarb 0xf5
+        addc-mba
+        and 8
+        add 2
+        rarb 0xf5
+        to-mba
     
     b after_food_collision
 
