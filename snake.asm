@@ -14,8 +14,8 @@ game_loop:
         bnez jump
         call continue_direction
         jump:
-        call check_direction
         call move_snake
+        call check_direction
         call after_move
         # call check_collision
         # call check_eat_food
@@ -50,10 +50,10 @@ game_loop:
     move_up:
         # update head
         rarb 1
-        dec*-mba # old head row -= 1
         from-mba
-
         beqz bounds_collision    # if head row is at 0 and we go up pa, collision!
+
+        dec*-mba # 
         ret
 
     move_down:
