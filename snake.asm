@@ -1611,6 +1611,20 @@ draw_score:
     from-reg 4
     xor 9
     beqz draw_9
+    draw_1X:
+        acc 4
+        rarb 205
+        or*-mba
+        rarb 210
+        or*-mba
+        rarb 215
+        or*-mba
+        rarb 220
+        or*-mba
+        rarb 225
+        or*-mba
+        rarb 230
+        or*-mba
     from-reg 4
     xor 10
     beqz draw_10
@@ -1845,19 +1859,6 @@ draw_9:
     b after_draw_score
 
 draw_10:
-    acc 4
-    rarb 205
-    or*-mba
-    rarb 210
-    or*-mba
-    rarb 215
-    or*-mba
-    rarb 220
-    or*-mba
-    rarb 225
-    or*-mba
-    rarb 230
-    or*-mba
     acc 7
     rarb 206
     to-mba
@@ -1875,19 +1876,6 @@ draw_10:
     b after_draw_score
 
 draw_11:
-    acc 8
-    rarb 205
-    or*-mba
-    rarb 210
-    or*-mba
-    rarb 215
-    or*-mba
-    rarb 220
-    or*-mba
-    rarb 225
-    or*-mba
-    rarb 230
-    or*-mba
     acc 2
     rarb 206
     to-mba
@@ -1904,19 +1892,6 @@ draw_11:
     b after_draw_score
 
 draw_12:
-    acc 4
-    rarb 205
-    or*-mba
-    rarb 210
-    or*-mba
-    rarb 215
-    or*-mba
-    rarb 220
-    or*-mba
-    rarb 225
-    or*-mba
-    rarb 230
-    or*-mba
     acc 7
     rarb 206
     to-mba
@@ -1935,19 +1910,6 @@ draw_12:
     b after_draw_score
 
 draw_13:
-    acc 4
-    rarb 205
-    or*-mba
-    rarb 210
-    or*-mba
-    rarb 215
-    or*-mba
-    rarb 220
-    or*-mba
-    rarb 225
-    or*-mba
-    rarb 230
-    or*-mba
     acc 7
     rarb 206
     to-mba
@@ -1965,19 +1927,6 @@ draw_13:
     b after_draw_score
 
 draw_14:
-    acc 4
-    rarb 205
-    or*-mba
-    rarb 210
-    or*-mba
-    rarb 215
-    or*-mba
-    rarb 220
-    or*-mba
-    rarb 225
-    or*-mba
-    rarb 230
-    or*-mba
     acc 5
     rarb 206
     to-mba
@@ -1996,19 +1945,6 @@ draw_14:
     b after_draw_score
 
 draw_15:
-    acc 4
-    rarb 205
-    or*-mba
-    rarb 210
-    or*-mba
-    rarb 215
-    or*-mba
-    rarb 220
-    or*-mba
-    rarb 225
-    or*-mba
-    rarb 230
-    or*-mba
     acc 7
     rarb 206
     to-mba
