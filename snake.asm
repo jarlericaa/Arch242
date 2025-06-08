@@ -51,16 +51,7 @@ game_loop:
         # update head
         rarb 1
         dec*-mba # old head row -= 1
-
-        #update tail
-        rarb 0xfe
         from-mba
-        to-reg 1
-        rcrd 0xff
-        from-mdc
-        to-reg 0
-        # rb:ra = addre of tail row
-        dec*-mba # old tail row -= 1
 
         beqz bounds_collision    # if head row is at 0 and we go up pa, collision!
         ret
@@ -68,57 +59,30 @@ game_loop:
     move_down:
         # update head
         rarb 1
-        from-mba    # ACC = old head row
-        inc*-mba # old head row += 1
-
-        #update tail
-        rarb 0xfe
         from-mba
-        to-reg 1
-        rcrd 0xff
-        from-mdc
-        to-reg 0
-        # rb:ra = addre of tail row
-        inc*-mba # old tail row += 1
-
+        sub 9  # ACC = old head row - 9
         beqz bounds_collision   # if ACC = 0, then old head row was 9, so if we go down pa, collision!
+        
+        inc*-mba # old head row += 1
         ret
 
     move_left:
         # update head
         rarb 2
-        dec*-mba # old head col -= 1
-
-        #update tail
-        rarb 0xfc
         from-mba
-        to-reg 1
-        rcrd 0xfd
-        from-mdc
-        to-reg 0
-        # rb:ra = addre of tail col
-        dec*-mba # old tail col -= 1
-
         beqz bounds_collision    # if head col is at 0 and we go left pa, collision!
+
+        dec*-mba # old head col -= 1
         ret
 
     move_right:
         # update head
         rarb 2
-        inc*-mba # old head col += 1
-
-        #update tail
-        rarb 0xfc
         from-mba
-        to-reg 1
-        rcrd 0xfd
-        from-mdc
-        to-reg 0
-        # rb:ra = addre of tail col
-        inc*-mba # old tail col += 1
-
+        sub 11  # ACC = old head row - 11
         beqz bounds_collision   # if ACC = 0, then old head row col 11, so if we go right pa, collision!
 
+        inc*-mba # old head col += 1
         ret
 
     move_snake:
