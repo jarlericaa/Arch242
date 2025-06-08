@@ -1045,7 +1045,8 @@ food_collision:
                 rcrd 0xff
                 to-mdc
                 bnez-cf NULL_Compute_rowRB
-                b NULL_Get_col
+                b NULL_copy_rowRB
+                
 
             NULL_Compute_rowRB:
                 rarb 0xfc
@@ -1053,7 +1054,14 @@ food_collision:
                 add-mba
                 rcrd 0xfe
                 to-mdc
+                b NULL_Get_col
             #atp, MEM[0xfe:0xff] shoud be the address of the new NULL ROW
+
+            NULL_copy_rowRB:
+                rarb 0xfc
+                rcrd 0xfe
+                from-mba
+                to-mdc
 
             NULL_Done_Compute_row:
 
@@ -1067,13 +1075,21 @@ food_collision:
                 rcrd 0xfd
                 to-mdc
                 bnez-cf NULL_Compute_colRB
-                b NULL_Done_Compute_col
+                b NULL_copy_colRB
+                
             
             NULL_Compute_colRB:
                 rarb 0xfe
                 acc 1
                 add-mba
                 rcrd 0xfc
+                to-mdc
+                b NULL_Done_Compute_col
+            
+            NULL_copy_colRB:
+                rarb 0xfe
+                rcrd 0xfc
+                from-mba
                 to-mdc
 
             NULL_Done_Compute_col:
