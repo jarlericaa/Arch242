@@ -18,9 +18,10 @@ game_loop:
         call move_snake
         call check_direction
         call after_move
+        call draw_food
+        call draw_score
         # call check_collision
         # call check_eat_food
-        # call draw_score
         b game_loop
 
 
@@ -271,11 +272,6 @@ after_food_collision:
 
     # ---- END OF HANDLE INPUT/MOVVE----
 
-    # call check_collision
-    # call check_eat_food
-    call draw_score
-    call draw_food
-    b game_loop
 
 init_snake:
     # hardcode to LED
@@ -347,6 +343,11 @@ init_snake:
     # set initial direction
     rarb 242
     acc 8
+    to-mba
+
+    # set initial score
+    rarb 243
+    acc 0
     to-mba
 
     # set initial food locatino
@@ -1207,6 +1208,50 @@ draw_food:
     ret
 
 draw_score:
+    acc 1
+    rarb 195
+    to-mba
+    rarb 200
+    to-mba
+    rarb 205
+    to-mba
+    rarb 210
+    to-mba
+    rarb 215
+    to-mba
+    rarb 220
+    to-mba
+    rarb 225
+    to-mba
+    rarb 230
+    to-mba
+    rarb 235
+    to-mba
+    rarb 240
+    to-mba
+    clear_scoreboard:
+        acc 0
+        rarb 196
+        to-mba
+        rarb 201
+        to-mba
+        rarb 206
+        to-mba
+        rarb 211
+        to-mba
+        rarb 216
+        to-mba
+        rarb 221
+        to-mba
+        rarb 226
+        to-mba
+        rarb 231
+        to-mba
+        rarb 236
+        to-mba
+        rarb 241
+        to-mba
+
     rarb 243
     from-mba
     to-reg 4
@@ -1705,30 +1750,5 @@ draw_15:
     rarb 221
     to-mba
     rarb 226
-    to-mba
-    ret
-
-clear_scoreboard:
-    b draw_divider
-    acc 0
-    rarb 196
-    to-mba
-    rarb 201
-    to-mba
-    rarb 206
-    to-mba
-    rarb 211
-    to-mba
-    rarb 216
-    to-mba
-    rarb 221
-    to-mba
-    rarb 226
-    to-mba
-    rarb 231
-    to-mba
-    rarb 236
-    to-mba
-    rarb 241
     to-mba
     ret
