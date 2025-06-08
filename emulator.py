@@ -56,10 +56,10 @@ class Arch242Emulator:
         self.ioa = 0 # 4-bit register
 
         self.running = True
-        self.debugging = False
+        self.debugging = True
         if self.debugging:
             open("logs/debugging.txt", 'w').close()
-        pyxel.init(CELL_DIM * NUM_COLS, CELL_DIM * NUM_ROWS, title="Arch242 Emulator", fps=1000)
+        pyxel.init(CELL_DIM * NUM_COLS, CELL_DIM * NUM_ROWS, title="Arch242 Emulator", fps=1500)
         pyxel.run(self.update, self.draw)
 
     def update(self):
@@ -75,12 +75,19 @@ class Arch242Emulator:
                     f.write(f"cf: {self.cf}\n")
                     f.write(f"temp: {self.temp}\n")
                     f.write(f"registers: {self.reg}\n")
-                    f.write(f"{self.data_mem}\n")
-                    f.write(f"0x25 (rb): {self.data_mem[0x25]}\n")
-                    f.write(f"0x26 (ra): {self.data_mem[0x26]}\n")
-                    f.write(f"0x27 (length): {self.data_mem[0x27]}\n")
-                    f.write(f"0x33 (rb): {self.data_mem[0x33]}\n")
-                    f.write(f"0x32 (ra): {self.data_mem[0x32]}\n")
+                    f.write(f"direction): {self.data_mem[0xf2]}\n")
+                    f.write(F"ioa: {self.ioa}\n")
+                    f.write(f"length: {self.data_mem[0x00]}\n")
+                    f.write(f"head position: r: {self.data_mem[0x01]}, c: {self.data_mem[0x02]}\n")
+                    f.write(f"NULL: r: {self.data_mem[0x07]}, c: {self.data_mem[0x08]}\n")
+                    f.write(f"tail pointer r: 0x{self.data_mem[0xfe]}{self.data_mem[0xff]}\n")
+                    f.write(f"tail pointer c: 0x{self.data_mem[0xfc]}{self.data_mem[0xfd]}\n")
+                    f.write(f"0x35: {self.data_mem[0x35]}\n")
+                    f.write(f"0x36: {self.data_mem[0x36]}\n")
+                    f.write(f"0x34: {self.data_mem[0x34]}\n")
+                    f.write(f"217: {self.data_mem[0xd9]}\n")
+                    f.write(f"218: {self.data_mem[0xda]}\n")
+                    
                     f.write(f"\n")
 
     def draw(self):
