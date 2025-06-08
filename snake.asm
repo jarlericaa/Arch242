@@ -3,16 +3,163 @@ init:
     call draw_divider
     call draw_score
     call draw_food
+    call draw_snake
 
 game_loop:
-    call move_snake
-    call handle_input
+    handle_input:
+        from-ioa
+        to-reg 4 # store value of ioa to RE for retrieval
+        # check if not pressed
+        and 15
+        bnez jump
+        call continue_direction
+        jump:
+        call check_direction
+        call move_snake
+        call after_move
+        # call check_collision
+        # call check_eat_food
+        # call draw_score
+        b game_loop
+
+
+    check_direction:
+        # check if up
+        from-reg 4
+        and 1
+        bnez move_up
+        # check if down
+        from-reg 4
+        and 2
+        bnez move_down
+        # check if left
+        from-reg 4
+        and 4
+        bnez move_left
+        # check if right
+        from-reg 4
+        and 8
+        bnez move_right
+
+    continue_direction:
+        rarb 242
+        from-mba
+        to-reg 4
+        ret
+
+    move_up:
+        # update head
+        rarb 1
+        dec*-mba # old head row -= 1
+
+        #update tail
+        rarb 0xfe
+        from-mba
+        to-reg 1
+        rcrd 0xff
+        from-mdc
+        to-reg 0
+        # rb:ra = addre of tail row
+        dec*-mba # old tail row -= 1
+
+        beqz bounds_collision    # if head row is at 0 and we go up pa, collision!
+        ret
+
+    move_down:
+        # update head
+        rarb 1
+        from-mba    # ACC = old head row
+        inc*-mba # old head row += 1
+
+        #update tail
+        rarb 0xfe
+        from-mba
+        to-reg 1
+        rcrd 0xff
+        from-mdc
+        to-reg 0
+        # rb:ra = addre of tail row
+        inc*-mba # old tail row += 1
+
+        beqz bounds_collision   # if ACC = 0, then old head row was 9, so if we go down pa, collision!
+        ret
+
+    move_left:
+        # update head
+        rarb 2
+        dec*-mba # old head col -= 1
+
+        #update tail
+        rarb 0xfc
+        from-mba
+        to-reg 1
+        rcrd 0xfd
+        from-mdc
+        to-reg 0
+        # rb:ra = addre of tail col
+        dec*-mba # old tail col -= 1
+
+        beqz bounds_collision    # if head col is at 0 and we go left pa, collision!
+        ret
+
+    move_right:
+        # update head
+        rarb 2
+        inc*-mba # old head col += 1
+
+        #update tail
+        rarb 0xfc
+        from-mba
+        to-reg 1
+        rcrd 0xfd
+        from-mdc
+        to-reg 0
+        # rb:ra = addre of tail col
+        inc*-mba # old tail col += 1
+
+        beqz bounds_collision   # if ACC = 0, then old head row col 11, so if we go right pa, collision!
+
+        ret
+
+    move_snake:
+        # atp, current rb:ra is 0x02 -> head col
+        # we want to update the tail coord
+
+        rcrd 36
+        rarb 34
+        move_snake_base: # if ra is zero check if rb is also zero
+            bnz-a move_snake_loop
+        move_snake_base2: # if ra and rb are zero return to game_loop
+            bnz-b move_snake_loop
+            ret
+        move_snake_loop:
+            # update corresponding coordinate
+            from-mba
+            to-mdc
+            from-reg 0 # put ra to acc to check if need to subtract 1 from rb
+            dec*-reg 0 # decrement ra
+            beqz is_rb_zero_move # if ra is zero, check if rb is also zero
+            dec_rdrc_move:
+                from-reg 2 # put rc to acc to check if need to subtract 1 from rd
+                dec*-reg 2 # # if ra is nonzero decrement rdrc
+            beqz dec_rd_move # if rc is zero, decrement rd. note that rdrc will never be zero.
+            b move_snake_base # if rc is nonzero before decrementing then go back to snake_base
+            is_rb_zero_move:
+                bnz-b dec_rb_move
+                ret # if rb is also zero, then we can return to game loop
+            dec_rb_move:
+                dec*-reg 1
+                b dec_rdrc_move
+            dec_rd_move:
+                dec*-reg 3
+            b move_snake_base
+
+    # ---- END OF HANDLE INPUT/MOVVE----
+
     # call check_collision
     # call check_eat_food
     call draw_score
     call draw_food
-    call draw_snake
-    call clear_tail
     b game_loop
 
 init_snake:
@@ -36,7 +183,7 @@ init_snake:
     acc 3
     to-mdc
 
-    # segment 1:
+    # segment 2:
     rarb 3
     rcrd 4
     acc 5
@@ -44,8 +191,17 @@ init_snake:
     acc 2
     to-mdc
 
-    # segment 2 (where the tail pointer is first pointed):
+    # segment 3:
     rarb 5
+    rcrd 6
+    acc 5
+    to-mba
+    acc 1
+    to-mdc
+    
+
+    # NULL (where the tail pointer is pointed):
+    rarb 7
     # store 5 to tail row pointer
     from-reg 0
     rcrd 0xff
@@ -56,7 +212,7 @@ init_snake:
     # so, current addr of tail row: MEM[0xfe]:MEM[0xff]
 
     # next, store 6 to tail col pointer
-    rcrd 6
+    rcrd 8
     from-reg 2
     rarb 0xfd
     to-mba # store ra of col -> 0xfd
@@ -65,12 +221,12 @@ init_snake:
     to-mba # store rb of col -> 0xfc
     # current addr of tail col: MEM[0xfc]:MEM[0xfd]
 
-    # segment 3
-    rarb 5
-    rcrd 6
+    #set the position of the NULL
+    rarb 7
     acc 5
     to-mba
-    acc 1
+    rcrd 8
+    acc 0
     to-mdc
 
     # set initial direction
@@ -87,103 +243,7 @@ init_snake:
     to-mba
     ret
 
-handle_input:
-    from-ioa
-    to-reg 4 # store value of ioa to RE for retrieval
-    # check if not pressed
-    and 15
-    beqz continue_direction
-    b check_direction
 
-check_direction:
-    # check if up
-    from-reg 4
-    and 1
-    bnez move_up
-    # check if down
-    from-reg 4
-    and 2
-    bnez move_down
-    # check if left
-    from-reg 4
-    and 4
-    bnez move_left
-    # check if right
-    from-reg 4
-    and 8
-    bnez move_right
-
-continue_direction:
-    rarb 242
-    from-mba
-    to-reg 4
-    b check_direction
-
-move_up:
-    rarb 1
-    from-mba    # ACC = old head row
-    beqz bounds_collision    # if head row is at 0 and we go up pa, collision!
-    
-    dec*-mba
-    ret
-
-move_down:
-    rarb 1
-    from-mba    # ACC = old head row
-
-    sub 9  # ACC = old head row - 9
-    beqz bounds_collision   # if ACC = 0, then old head row was 9, so if we go down pa, collision!
-    
-    inc*-mba
-    ret
-
-move_left:
-    rarb 2
-    from-mba    # ACC = old head col
-    beqz bounds_collision    # if head col is at 0 and we go left pa, collision!
-
-    dec*-mba
-    ret
-
-move_right:
-    rarb 2
-    from-mba    # ACC = old head col
-
-    sub 11  # ACC = old head row - 11
-    beqz bounds_collision   # if ACC = 0, then old head row col 11, so if we go right pa, collision!
-    
-    inc*-mba
-    ret
-
-move_snake:
-    rcrd 36
-    rarb 34
-    move_snake_base: # if ra is zero check if rb is also zero
-        bnz-a move_snake_loop
-    move_snake_base2: # if ra and rb are zero return to game_loop
-        bnz-b move_snake_loop
-        ret
-    move_snake_loop:
-        # update corresponding coordinate
-        from-mba
-        to-mdc
-        from-reg 0 # put ra to acc to check if need to subtract 1 from rb
-        dec*-reg 0 # decrement ra
-        beqz is_rb_zero_move # if ra is zero, check if rb is also zero
-        dec_rdrc_move:
-            from-reg 2 # put rc to acc to check if need to subtract 1 from rd
-            dec*-reg 2 # # if ra is nonzero decrement rdrc
-        beqz dec_rd_move # if rc is zero, decrement rd. note that rdrc will never be zero.
-        b move_snake_base # if rc is nonzero before decrementing then go back to snake_base
-        is_rb_zero_move:
-            bnz-b dec_rb_move
-            ret # if rb is also zero, then we can return to game loop
-        dec_rb_move:
-            dec*-reg 1
-            b dec_rdrc_move
-        dec_rd_move:
-            dec*-reg 3
-        b move_snake_base
 
 draw_snake:
     rcrd 0x00
@@ -396,9 +456,136 @@ draw_snake:
         from-mdc 
         bnez Build_segment # if di pa 0, continue building
     ret
-    # shutdown
+    
+after_move: # draw new head and clear old tail
+    # HEAD:
+    # by now, head is now updated dapat cc: handle_input
+    # load the new head's row, then store it to rc
+    rarb 0x01
+    from-mba #acc = head row
+    to-reg 2 # rc = new head's row
+    # load the new head's col, store to re
+    rarb 0x02
+    from-mba #acc = head col
+    to-reg 4 # re = new head's col
 
-    clear_tail:
+    # computing memory address given row, col
+    # LED_addr = 192 + row*5 + (col//4)
+
+    # input (assume na-load na yung row, col from memory):
+    # rc = segment's row
+    # re = segment's col
+    
+
+    # store c -> SCRATCH A and 0 -> scratch B
+    acc 12
+    rarb 0x25
+    to-mba
+    acc 0
+    rarb 0x26
+    to-mba #MEM[0x25] -> c ; MEM[0x26] -> 0
+
+    #COMPUTING RA which is nasa MEM[0x26]
+    clr-cf
+    acc 5
+    to-reg 3 # RA = counter for ilang beses mag-add (starting: 5)
+    afterm_draw_segment_Compute_RA:
+        rarb 0x26
+        clr-cf
+        from-reg 2 # acc = row
+        add-mba # MEM[0x26] + row
+        to-mba
+        from-reg 2
+        dec*-reg 3 # ra-=1
+        bnez-cf afterm_draw_segment_Compute_RB
+        bnz-d afterm_draw_segment_Compute_RA
+        b afterm_Done_multiply
+
+    afterm_draw_segment_Compute_RB:
+        rarb 0x25
+        acc 1
+        add-mba
+        to-mba
+        bnz-d afterm_draw_segment_Compute_RA
+
+    afterm_Done_multiply:
+        from-reg 4
+        rot-r
+        rot-r
+        and 3 #acc = 
+        
+    afterm_draw_segment_Compute_RA2:
+        rarb 0x26
+        add-mba 
+        to-mba
+        bnez-cf afterm_draw_segment_Compute_RB2
+        b afterm_Done_finally
+    
+    afterm_draw_segment_Compute_RB2:
+        rarb 0x25
+        acc 1
+        add-mba
+        to-mba
+
+    afterm_Done_finally:
+        rcrd 0x25
+        from-mdc #acc = MEM[0x25] -> rb dapat
+        to-reg 1 
+
+        rcrd 0x26
+        from-mdc #acc = MEM[0x26] -> ra
+        to-reg 0
+    # ATP DAPAT RB:RA = LED ADDRESS NA
+    # store rb sa MEM[0x35]
+    rcrd 0x35
+    from-reg 1
+    to-mdc
+    
+
+    # store ra sa MEM[0x36]
+    rcrd 0x36
+    from-reg 0
+    to-mdc
+    # address is in 0x35:0x36
+
+    from-reg 4 # acc = col
+    and 3 # acc = col and 3
+    rcrd 0x31
+    to-mdc 
+
+
+    # load col and 3 sa acc
+    rcrd 0x31
+    from-mdc # acc = col and 3
+
+    afterm_ZerothIsZero:
+        b-bit 0 afterm_ZerothIsOne
+        afterm_aOnethIsZero: #00
+            b-bit 1 afterm_aOnethIsOne
+            acc 1
+            b afterm_AfterBBit
+
+        afterm_aOnethIsOne: #10
+            acc 4
+            b afterm_AfterBBit
+
+    afterm_ZerothIsOne:
+        afterm_bOnethIsZero: #01
+            b-bit 1 afterm_bOnethIsOne
+            acc 2
+            b afterm_AfterBBit
+
+        afterm_bOnethIsOne: #11
+            acc 8
+            b afterm_AfterBBit
+    
+    
+    
+    afterm_AfterBBit:
+    rarb 0x34
+    to-mba
+
+    # NOW COMPUTE TAIL
     # first copmute the memory address of the tail 
     # load the tail's row, then store it to rc
     rcrd 0xfe
@@ -539,10 +726,24 @@ draw_snake:
             acc 7
             b clear_AfterBBit
     
+    # NOW CLEAR THE TAIL
+    shutdown 
     clear_AfterBBit:
-
         and*-mba # update the bits of the led, dapat mamamatay na yung ilaw
     
+    #now draw the new head
+    #load the head address from 0x35 and 0x36
+    rarb 0x35
+    from-mba
+    to-reg 1
+    rcrd 0x36
+    from-mdc
+    to-reg 0
+
+    # load acc offset from 0x34
+    rcrd 0x34
+    from-mdc
+    or*-mba # update the bits of the led, dapat iilaw na yung dapat iilaw
     ret
 
 bounds_collision:
