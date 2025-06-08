@@ -447,7 +447,7 @@ draw_snake:
                 acc 1
                 add-mba
                 to-mba
-                bnez-cf draw_snake_Compute_colRA
+                bnez-cf draw_snake_Compute_colRB
                 b draw_snake_Done_Compute_col
             
             draw_snake_Compute_colRB:
@@ -1064,7 +1064,7 @@ food_collision:
                 add-mba
                 rcrd 0xfd
                 to-mdc
-                bnez-cf NULL_Compute_colRA
+                bnez-cf NULL_Compute_colRB
                 b NULL_Done_Compute_col
             
             NULL_Compute_colRB:
