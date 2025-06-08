@@ -53,9 +53,44 @@ game_loop:
         rarb 1
         from-mba
         beqz bounds_collision    # if head row is at 0 and we go up pa, collision!
+        
+        #checking of food collision:
+        # head row == food row AND head col == food col -> collide
+        # food row colflag: 0x38
+        rarb 0x38
+        rcrd 0x01 # head row
+        from-mdc
+        to-mba 
+        rcrd 0xf4 # food row
+        from-mdc # acc = food row
+        xor*-mba 
 
-        dec*-mba # 
-        ret
+        # food col colflag: 0x39
+        rarb 0x39
+        rcrd 0x02 # head col
+        from-mdc
+        to-mba 
+        rcrd 0xf5 # food col
+        from-mdc # acc = food col
+        xor*-mba 
+
+        # food collision flag: 0x37
+        rarb 0x37
+        rcrd 0x38
+        from-mdc
+        to-mba # 0x37 == food row colflag
+        rcrd 0x39
+        from-mdc # acc == food col colflag
+        xor*-mba
+        from-mba
+
+        rarb 1
+        dec*-mba # head row -= 1
+
+        
+        # 0x37 == 1 -> food collision
+        beqz food_collision
+        b after_food_collision
 
     move_down:
         # update head
@@ -64,17 +99,86 @@ game_loop:
         sub 9  # ACC = old head row - 9
         beqz bounds_collision   # if ACC = 0, then old head row was 9, so if we go down pa, collision!
         
+        #checking of food collision:
+        # head row == food row AND head col == food col -> collide
+        # food row colflag: 0x38
+        rarb 0x38
+        rcrd 0x01 # head row
+        from-mdc
+        to-mba 
+        rcrd 0xf4 # food row
+        from-mdc # acc = food row
+        xor*-mba 
+
+        # food col colflag: 0x39
+        rarb 0x39
+        rcrd 0x02 # head col
+        from-mdc
+        to-mba 
+        rcrd 0xf5 # food col
+        from-mdc # acc = food col
+        xor*-mba 
+
+        # food collision flag: 0x37
+        rarb 0x37
+        rcrd 0x38
+        from-mdc
+        to-mba # 0x37 == food row colflag
+        rcrd 0x39
+        from-mdc # acc == food col colflag
+        xor*-mba
+        from-mba
+
+        rarb 1
         inc*-mba # old head row += 1
-        ret
+
+        
+        # 0x37 == 1 -> food collision
+        beqz food_collision
+        b after_food_collision
 
     move_left:
         # update head
         rarb 2
         from-mba
-        beqz bounds_collision    # if head col is at 0 and we go left pa, collision!
+        beqz bounds_collision    # if head col is at 0 xor we go left pa, collision!
 
+        #checking of food collision:
+        # head row == food row AND head col == food col -> collide
+        # food row colflag: 0x38
+        rarb 0x38
+        rcrd 0x01 # head row
+        from-mdc
+        to-mba 
+        rcrd 0xf4 # food row
+        from-mdc # acc = food row
+        xor*-mba 
+
+        # food col colflag: 0x39
+        rarb 0x39
+        rcrd 0x02 # head col
+        from-mdc
+        to-mba 
+        rcrd 0xf5 # food col
+        from-mdc # acc = food col
+        xor*-mba 
+
+        # food collision flag: 0x37
+        rarb 0x37
+        rcrd 0x38
+        from-mdc
+        to-mba # 0x37 == food row colflag
+        rcrd 0x39
+        from-mdc # acc == food col colflag
+        xor*-mba
+        from-mba
+        
+        rarb 2
         dec*-mba # old head col -= 1
-        ret
+        # 0x37 == 1 -> food collision
+        beqz food_collision
+
+        b after_food_collision
 
     move_right:
         # update head
@@ -83,8 +187,54 @@ game_loop:
         sub 11  # ACC = old head row - 11
         beqz bounds_collision   # if ACC = 0, then old head row col 11, so if we go right pa, collision!
 
-        inc*-mba # old head col += 1
-        ret
+        #checking of food collision:
+        # head row == food row AND head col == food col -> collide
+        # food row colflag: 0x38
+        
+        rarb 0x38
+        rcrd 0x01 # head row
+        from-mdc
+        to-mba 
+        rcrd 0xf4 # food row
+        from-mdc # acc = food row
+        xor*-mba 
+
+        # food col colflag: 0x39
+        rarb 0x39
+        rcrd 0x02 # head col
+        from-mdc
+        to-mba 
+        rcrd 0xf5 # food col
+        from-mdc # acc = food col
+        xor*-mba 
+
+        # food collision flag: 0x37
+        rarb 0x37
+        rcrd 0x38
+        from-mdc
+        to-mba # 0x37 == food row colflag
+        rcrd 0x39
+        from-mdc # acc == food col colflag
+        xor*-mba
+        from-mba # acc == food col 
+
+        rarb 2
+        inc*-mba
+        # 0x37 == 0 -> food collision
+        beqz food_collision
+
+        # old head col += 1
+        b after_food_collision
+
+after_food_collision:
+    acc 1
+    rarb 0x37
+    to-mba
+    rarb 0x38
+    to-mba
+    rarb 0x39
+    to-mba
+    ret 
 
     move_snake:
         # atp, current rb:ra is 0x02 -> head col
@@ -206,8 +356,12 @@ init_snake:
     rarb 245
     acc 6
     to-mba
-    ret
 
+    # set initial food col flag to 1
+    rarb 0x37
+    acc 1
+    to-mba
+    ret
 
 clear_screen:
     rarb 0xC0 # first LED address, let RA be 0x0 and RB be 0xC
@@ -230,7 +384,6 @@ clear_screen:
 
     clear_screen_done:
         ret
-
 
 draw_snake:
     rcrd 0x00
@@ -714,7 +867,6 @@ after_move: # draw new head and clear old tail
             b clear_AfterBBit
     
     # NOW CLEAR THE TAIL
-    shutdown 
     clear_AfterBBit:
         and*-mba # update the bits of the led, dapat mamamatay na yung ilaw
     
@@ -732,6 +884,201 @@ after_move: # draw new head and clear old tail
     from-mdc
     or*-mba # update the bits of the led, dapat iilaw na yung dapat iilaw
     ret
+
+
+food_collision:
+    rarb 0xf3
+    inc*-mba
+    
+    add_segment:
+        # +1 length
+        rarb 0x00
+        inc*-mba
+        
+        # load the NULL col
+        rarb 0xfd
+        from-mba
+        to-reg 0
+        rcrd 0xfc
+        from-mdc
+        to-reg 1
+        # store NULL col to re
+        from-mba
+        to-reg 4
+
+        # draw the current NULL pointer
+        # load the NULL row 
+        rarb 0xff
+        from-mba
+        to-reg 0
+        rcrd 0xfe
+        from-mdc
+        to-reg 1
+        # store NULL row to rc
+        from-mba
+        to-reg 2
+
+        # DRAW CURRENT NULL
+        # computing memory address given row, col
+        # LED_addr = 192 + row*5 + (col//4)
+
+        # input (assume na-load na yung row, col from memory):
+        # rc = segment's row
+        # re = segment's col
+        
+
+        # store c -> SCRATCH A and 0 -> scratch B
+        acc 12
+        rarb 0x25
+        to-mba
+        acc 0
+        rarb 0x26
+        to-mba #MEM[0x25] -> c ; MEM[0x26] -> 0
+
+        #COMPUTING RA which is nasa MEM[0x26]
+        clr-cf
+        acc 5
+        to-reg 3 # RA = counter for ilang beses mag-add (starting: 5)
+        add_segment_Compute_RA:
+            rarb 0x26
+            clr-cf
+            from-reg 2 # acc = row
+            add-mba # MEM[0x26] + row
+            to-mba
+            from-reg 2
+            dec*-reg 3 # ra-=1
+            bnez-cf add_segment_Compute_RB
+            bnz-d add_segment_Compute_RA
+            b add_Done_multiply
+
+        add_segment_Compute_RB:
+            rarb 0x25
+            acc 1
+            add-mba
+            to-mba
+            bnz-d add_segment_Compute_RA
+
+        add_Done_multiply:
+            from-reg 4
+            rot-r
+            rot-r
+            and 3 #acc = 
+            
+        add_segment_Compute_RA2:
+            rarb 0x26
+            add-mba 
+            to-mba
+            bnez-cf add_segment_Compute_RB2
+            b add_Done_finally
+        
+        add_segment_Compute_RB2:
+            rarb 0x25
+            acc 1
+            add-mba
+            to-mba
+
+        add_Done_finally:
+            rcrd 0x25
+            from-mdc #acc = MEM[0x25] -> rb dapat
+            to-reg 1 
+
+            rcrd 0x26
+            from-mdc #acc = MEM[0x26] -> ra
+            to-reg 0
+        # ATP DAPAT RB:RA = LED ADDRESS NA
+        # store rb sa MEM[0x29]
+        rcrd 0x29 
+        from-reg 1
+        to-mdc
+
+        # store ra sa MEM[0x30]
+        rcrd 0x30
+        from-reg 0
+        to-mdc
+
+        from-reg 4 # acc = col
+        and 3 # acc = col and 3
+        rcrd 0x31
+        to-mdc 
+
+
+        # load col and 3 sa acc
+        rcrd 0x31
+        from-mdc # acc = col and 3
+
+        add_ZerothIsZero:
+            b-bit 0 add_ZerothIsOne
+            add_aOnethIsZero: #00
+                b-bit 1 add_aOnethIsOne
+                acc 1
+                b add_AfterBBit
+
+            add_aOnethIsOne: #10
+                acc 4
+                b add_AfterBBit
+
+        add_ZerothIsOne:
+            add_bOnethIsZero: #01
+                b-bit 1 add_bOnethIsOne
+                acc 2
+                b add_AfterBBit
+
+            add_bOnethIsOne: #11
+                acc 8
+                b add_AfterBBit
+        
+        add_AfterBBit:
+
+            or*-mba # update the bits of the led, dapat iilaw na yung dapat iilaw
+
+        # ---------------------------------------------------
+        # move the NULL pointer to the next segment.
+        NULL_Get_row:
+            NULL_Compute_rowRA: # + 1 to the address of NULL COL
+                rarb 0xfd
+                clr-cf
+                acc 1
+                add-mba
+                rcrd 0xff
+                to-mdc
+                bnez-cf NULL_Compute_rowRB
+                b NULL_Get_col
+
+            NULL_Compute_rowRB:
+                rarb 0xfc
+                acc 1
+                add-mba
+                rcrd 0xfe
+                to-mdc
+            #atp, MEM[0xfe:0xff] shoud be the address of the new NULL ROW
+
+            NULL_Done_Compute_row:
+
+
+        NULL_Get_col:
+            NULL_Compute_colRA: # +1 to the address of the new NULL ROW
+                rarb 0xff
+                clr-cf
+                acc 1
+                add-mba
+                rcrd 0xfd
+                to-mdc
+                bnez-cf NULL_Compute_colRA
+                b NULL_Done_Compute_col
+            
+            NULL_Compute_colRB:
+                rarb 0xfe
+                acc 1
+                add-mba
+                rcrd 0xfc
+                to-mdc
+
+            NULL_Done_Compute_col:
+
+    # --------------------------
+    
+    b after_food_collision
+
 
 bounds_collision:
     b restart
@@ -796,7 +1143,7 @@ draw_food:
         add-mba 
         to-mba
         bnez-cf draw_food_Compute_RB2
-        b Done_finally
+        b finally_done
     
     draw_food_Compute_RB2:
         rarb 0x25
@@ -804,7 +1151,7 @@ draw_food:
         add-mba
         to-mba
 
-    Done_finally:
+    finally_done:
         rcrd 0x25
         from-mdc #acc = MEM[0x25] -> rb dapat
         to-reg 1 
@@ -833,28 +1180,28 @@ draw_food:
     rcrd 0x31
     from-mdc # acc = col and 3
 
-    ZerothIsZero:
-        b-bit 0 ZerothIsOne
-        aOnethIsZero: #00
-            b-bit 1 aOnethIsOne
+    food_ZerothIsZero:
+        b-bit 0 food_ZerothIsOne
+        food_aOnethIsZero: #00
+            b-bit 1 food_aOnethIsOne
             acc 1
-            b AfterBBit
+            b food_AfterBBit
 
-        aOnethIsOne: #10
+        food_aOnethIsOne: #10
             acc 4
-            b AfterBBit
+            b food_AfterBBit
 
-    ZerothIsOne:
-        bOnethIsZero: #01
-            b-bit 1 bOnethIsOne
+    food_ZerothIsOne:
+        food_bOnethIsZero: #01
+            b-bit 1 food_bOnethIsOne
             acc 2
-            b AfterBBit
+            b food_AfterBBit
 
-        bOnethIsOne: #11
+        food_bOnethIsOne: #11
             acc 8
-            b AfterBBit
+            b food_AfterBBit
     
-    AfterBBit:
+    food_AfterBBit:
         or*-mba # update the bits of the led, dapat iilaw na yung dapat iilaw
 
     ret
