@@ -2,6 +2,7 @@ init:
     call init_snake
     call draw_divider
     call draw_score
+    call draw_food
 
 game_loop:
     call move_snake
@@ -9,6 +10,7 @@ game_loop:
     # call check_collision
     # call check_eat_food
     call draw_score
+    call draw_food
     call draw_snake
     call clear_tail
     b game_loop
@@ -74,6 +76,14 @@ init_snake:
     # set initial direction
     rarb 242
     acc 8
+    to-mba
+
+    # set initial food locatino
+    rarb 244
+    acc 5
+    to-mba
+    rarb 245
+    acc 6
     to-mba
     ret
 
@@ -540,6 +550,126 @@ bounds_collision:
 
 restart:
     b init
+
+draw_food:
+    rarb 244 # food ROW address
+    from-mba
+    to-reg 2
+    rarb 245 # food COL address
+    from-mba
+    to-reg 4
+
+    # computing memory address given row, col
+    # LED_addr = 192 + row*5 + (col//4)
+
+    # input (assume na-load na yung row, col from memory):
+    # rc = segment's row
+    # re = segment's col
+
+    # store c -> SCRATCH A and 0 -> scratch B
+    acc 12
+    rarb 0x25
+    to-mba
+    acc 0
+    rarb 0x26
+    to-mba #MEM[0x25] -> c ; MEM[0x26] -> 0
+
+    #COMPUTING RA which is nasa MEM[0x26]
+    clr-cf
+    acc 5
+    to-reg 3 # RA = counter for ilang beses mag-add (starting: 5)
+    draw_food_Compute_RA:
+        rarb 0x26
+        clr-cf
+        from-reg 2 # acc = row
+        add-mba # MEM[0x26] + row
+        to-mba
+        from-reg 2
+        dec*-reg 3 # ra-=1
+        bnez-cf draw_food_Compute_RB
+        bnz-d draw_food_Compute_RA
+        b Done_multiply_food
+
+    draw_food_Compute_RB:
+        rarb 0x25
+        acc 1
+        add-mba
+        to-mba
+        bnz-d draw_food_Compute_RA
+
+    Done_multiply_food:
+        from-reg 4
+        rot-r
+        rot-r
+        and 3 #acc = 
+        
+    draw_food_Compute_RA2:
+        rarb 0x26
+        add-mba 
+        to-mba
+        bnez-cf draw_food_Compute_RB2
+        b Done_finally
+    
+    draw_food_Compute_RB2:
+        rarb 0x25
+        acc 1
+        add-mba
+        to-mba
+
+    Done_finally:
+        rcrd 0x25
+        from-mdc #acc = MEM[0x25] -> rb dapat
+        to-reg 1 
+
+        rcrd 0x26
+        from-mdc #acc = MEM[0x26] -> ra
+        to-reg 0
+    # ATP DAPAT RB:RA = LED ADDRESS NA
+    # store rb sa MEM[0x29]
+    rcrd 0x29 
+    from-reg 1
+    to-mdc
+
+    # store ra sa MEM[0x30]
+    rcrd 0x30
+    from-reg 0
+    to-mdc
+
+    from-reg 4 # acc = col
+    and 3 # acc = col and 3
+    rcrd 0x31
+    to-mdc 
+
+
+    # load col and 3 sa acc
+    rcrd 0x31
+    from-mdc # acc = col and 3
+
+    ZerothIsZero:
+        b-bit 0 ZerothIsOne
+        aOnethIsZero: #00
+            b-bit 1 aOnethIsOne
+            acc 1
+            b AfterBBit
+
+        aOnethIsOne: #10
+            acc 4
+            b AfterBBit
+
+    ZerothIsOne:
+        bOnethIsZero: #01
+            b-bit 1 bOnethIsOne
+            acc 2
+            b AfterBBit
+
+        bOnethIsOne: #11
+            acc 8
+            b AfterBBit
+    
+    AfterBBit:
+        or*-mba # update the bits of the led, dapat iilaw na yung dapat iilaw
+
+    ret
 
 draw_score:
     rarb 243
