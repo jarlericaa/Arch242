@@ -1,5 +1,24 @@
 init:
-    call clear_all
+    clear_all:
+        rarb 0x00 
+        clear_all_loop:
+            acc 0
+            to-mba
+            inc*-reg 0
+            from-reg 0  # acc = RA
+            and 15      # check if RA = 0xF for incrementing RB
+            beqz increment_rb_all
+            b clear_all_loop     # otherwise continue clearing
+
+        increment_rb_all:
+            inc*-reg 1
+            from-reg 1  # acc = RB
+            and 15      # check if RB = 0xF for stopping
+            beqz clear_all_done
+            b clear_all_loop
+
+        clear_all_done:
+ 
     call init_snake
     call draw_divider
     call draw_0
@@ -23,7 +42,6 @@ game_loop:
         # call check_collision
         # call check_eat_food
         b game_loop
-
 
     check_direction:
         # check if up
@@ -53,7 +71,7 @@ game_loop:
         # update head
         rarb 1
         from-mba
-        beqz bounds_collision    # if head row is at 0 and we go up pa, collision!
+        beqz init    # if head row is at 0 and we go up pa, collision!
         
         #checking of food collision:
         # head row == food row AND head col == food col -> collide
@@ -98,7 +116,7 @@ game_loop:
         rarb 1
         from-mba
         sub 9  # ACC = old head row - 9
-        beqz bounds_collision   # if ACC = 0, then old head row was 9, so if we go down pa, collision!
+        beqz init   # if ACC = 0, then old head row was 9, so if we go down pa, collision!
         
         #checking of food collision:
         # head row == food row AND head col == food col -> collide
@@ -142,7 +160,7 @@ game_loop:
         # update head
         rarb 2
         from-mba
-        beqz bounds_collision    # if head col is at 0 xor we go left pa, collision!
+        beqz init    # if head col is at 0 xor we go left pa, collision!
 
         #checking of food collision:
         # head row == food row AND head col == food col -> collide
@@ -186,7 +204,7 @@ game_loop:
         rarb 2
         from-mba
         sub 11  # ACC = old head row - 11
-        beqz bounds_collision   # if ACC = 0, then old head row col 11, so if we go right pa, collision!
+        beqz init   # if ACC = 0, then old head row col 11, so if we go right pa, collision!
 
         #checking of food collision:
         # head row == food row AND head col == food col -> collide
@@ -363,52 +381,7 @@ init_snake:
     acc 1
     to-mba
     ret
-
-clear_all:
-    rarb 0x00 
-
-    clear_all_loop:
-        acc 0
-        to-mba
-        inc*-reg 0
-        from-reg 0  # acc = RA
-        and 15      # check if RA = 0xF for incrementing RB
-        beqz increment_rb_all
-        b clear_all_loop     # otherwise continue clearing
-
-    increment_rb_all:
-        inc*-reg 1
-        from-reg 1  # acc = RB
-        and 15      # check if RB = 0xF for stopping
-        beqz clear_all_done
-        b clear_all_loop
-
-    clear_all_done:
-        ret
-
-# clear_all:
-#     rarb 0x00
-
-#     clear_all_loop:
-#         acc 0
-#         to-mba
-#         inc*-reg 0
-#         from-reg    # acc = RA
-#         and 15      # check if RA = 0xF for incrementing RB
-#         beqz increment_rb_all
-#         b clear_all_loop
-
-#     increment_rb_all:
-#         inc*-reg 1
-#         from-reg 1
-#         and 15
-
-#         beqz clear_clear_all_done
-#         b clear_all_loop
-
-#     clear_all_done:
-#         ret
-
+    
 draw_snake:
     rcrd 0x00
     from-mdc # acc = 0x00
@@ -953,7 +926,6 @@ food_collision:
         # rc = segment's row
         # re = segment's col
         
-
         # store c -> SCRATCH A and 0 -> scratch B
         acc 12
         rarb 0x25
@@ -1055,7 +1027,6 @@ food_collision:
                 b add_AfterBBit
         
         add_AfterBBit:
-
             or*-mba # update the bits of the led, dapat iilaw na yung dapat iilaw
 
         # ---------------------------------------------------
@@ -1121,6 +1092,7 @@ food_collision:
     # --------------------------
 
     spawn_food:
+        # food r 0xf4, c 0xf5
         # food_row = rotl(food_row + head_row + tail_col) & 0x8 + 1
         rcrd 0xfd
         from-mdc
@@ -1155,8 +1127,132 @@ food_collision:
         add 2
         rarb 0xf5
         to-mba
-    
-    b after_food_collision
+
+    # food collision check logic
+    check_food_collision:
+        # Load snake length
+        rarb 0x00
+        from-mba
+
+        rarb 0x3a
+        to-mba      # MEM[0x3a] = segments to check
+        
+        # loading food position
+        rarb 0xf4
+        from-mba
+        rarb 0x3b
+        to-mba      # MEM[0x3b] = food row
+        
+        rarb 0xf5
+        from-mba
+        rarb 0x3c
+        to-mba      # MEM[0x3c] = food col
+        
+        # initialize segment counter (start from segment 2, which is at [0x03, 0x04])
+        acc 1
+        rarb 0x3d
+        to-mba      # MEM[0x3d] = current segment row address (RC part)
+
+        acc 0
+        rarb 0x3e
+        to-mba      # MEM[0x3e] = current segment address (RD part)
+
+        food_collision_check_loop:
+            # set up RD:RC for the segment row address
+            rarb 0x3e
+            from-mba
+            to-reg 3    # RD = segment address high nibble
+            rarb 0x3d
+            from-mba
+            to-reg 2    # RC = segment address low nibble
+            
+            # check if row matches
+            from-mdc    # ACC = current segment row
+            rarb 0x3b   
+
+            xor-ba    # ACC = segment_row XOR head_row
+            bnez food_inc_to_col  # if different rows, skip to next segment
+            
+            # rows match, now check column - increment address by 1
+            rarb 0x3d
+            from-mba
+            inc         # increment RC value
+            and 15      # check if it wrapped (became > 15)
+            to-mba      # store back incremented RC
+
+            bnez food_setup_col_check  # if RC != 0, no wraparound
+            
+            # RC wrapped to 0, increment RD
+            rarb 0x3e
+            inc*-mba    # increment RD
+            
+            food_setup_col_check:
+                rarb 0x3e
+                from-mba
+                to-reg 3    # RD = segment address high nibble
+                rarb 0x3d
+                from-mba
+                to-reg 2    # RC = segment address low nibble
+            
+
+            from-mdc    # ACC = current segment col
+            rarb 0x3c   
+            xor-ba    # ACC = segment_col XOR head_col
+            beqz food_collided  # if same (result is 0), collision detected!
+            b food_inc_to_row
+
+        food_inc_to_col:
+            # move to its column (increment address by 1 more)
+            rarb 0x3d
+            from-mba
+            inc         # increment RC value
+            and 15      # handle wraparound
+            rarb 0x3d
+            to-mba      # store back incremented RC
+            bnez food_inc_to_row  # if RC != 0, no wraparound
+
+            
+            # RC wrapped to 0, increment RD
+            rarb 0x3e
+            inc*-mba    # increment RD
+
+        food_inc_to_row:
+            # move to next segment (increment address by 1 more)
+            rarb 0x3d
+            from-mba
+            inc         # increment RC value
+            and 15      # handle wraparound
+            rarb 0x3d
+            to-mba      # store back incremented RC
+            bnez food_continue_loop  # if RC != 0, no wraparound
+
+            
+            # RC wrapped to 0, increment RD
+            rarb 0x3e
+            inc*-mba    # increment RD
+
+            food_continue_loop:
+                rarb 0x3a
+                dec*-mba    # one less segment to check
+                from-mba
+                bnez food_collision_check_loop  # continue if segments left != 0
+
+        no_food_collision:
+            b after_food_collision
+
+    food_collided:
+        change_food_pos:
+            rarb 0xf4
+            from-mba
+            add 2
+            and 8
+            to-mba
+            rarb 0xf5
+            from-mba
+            add 3
+            and 8
+            to-mba
+            b check_food_collision
 
 check_body_collision:
     # Load snake length
@@ -1228,10 +1324,8 @@ check_body_collision:
         from-mdc    # ACC = current segment col
         rarb 0x3c   
         xor-ba    # ACC = segment_col XOR head_col
-        beqz body_collision  # if same (result is 0), collision detected!
+        beqz init  # if same (result is 0), collision detected!
         b inc_to_row
-
-
         
     inc_to_col:
         # move to its column (increment address by 1 more)
@@ -1243,7 +1337,6 @@ check_body_collision:
         to-mba      # store back incremented RC
         bnez inc_to_row  # if RC != 0, no wraparound
 
-        
         # RC wrapped to 0, increment RD
         rarb 0x3e
         inc*-mba    # increment RD
@@ -1257,7 +1350,6 @@ check_body_collision:
         rarb 0x3d
         to-mba      # store back incremented RC
         bnez continue_loop  # if RC != 0, no wraparound
-
         
         # RC wrapped to 0, increment RD
         rarb 0x3e
@@ -1272,16 +1364,7 @@ check_body_collision:
     no_body_collision:
         ret
 
-    body_collision:
-        b restart
 
-
-
-bounds_collision:
-    b restart
-
-restart:
-    b init
 
 draw_food:
     rarb 244 # food ROW address
@@ -1371,7 +1454,6 @@ draw_food:
     and 3 # acc = col and 3
     rcrd 0x31
     to-mdc 
-
 
     # load col and 3 sa acc
     rcrd 0x31
