@@ -938,7 +938,7 @@ food_collision:
 
     b draw_score
     after_draw_score:
-    
+
     add_segment:
         # +1 length
         rarb 0x00
@@ -1180,11 +1180,15 @@ food_collision:
     # food collision check logic
     check_food_collision:
         # Load snake length
-        rarb 0x00
+        rarb 0xf3
         from-mba
 
         rarb 0x3a
-        to-mba      # MEM[0x3a] = segments to check
+        to-mba      # MEM[0x3a] = segments to check - 3
+
+        acc 3
+        rarb 0x4a
+        to-mba     # MEM[0x4a] = 3 segments to check
         
         # loading food position
         rarb 0xf4
@@ -1197,7 +1201,7 @@ food_collision:
         rarb 0x3c
         to-mba      # MEM[0x3c] = food col
         
-        # initialize segment counter (start from segment 2, which is at [0x03, 0x04])
+        # initialize segment counter (start from head, which is at [0x01, 0x02])
         acc 1
         rarb 0x3d
         to-mba      # MEM[0x3d] = current segment row address (RC part)
@@ -1281,10 +1285,17 @@ food_collision:
             inc*-mba    # increment RD
 
             food_continue_loop:
-                rarb 0x3a
-                dec*-mba    # one less segment to check
+                rarb 0x4a
                 from-mba
-                bnez food_collision_check_loop  # continue if segments left != 0
+                beqz food_decrease_length
+                dec*-mba
+                b food_collision_check_loop
+
+                food_decrease_length:
+                    rarb 0x3a
+                    dec*-mba    # one less segment to check
+                    from-mba
+                    bnez food_collision_check_loop  # continue if segments left != 0
 
         no_food_collision:
             b after_food_collision
@@ -1305,13 +1316,16 @@ food_collision:
 
 check_body_collision:
     # Load snake length
-    rarb 0x00
+    rarb 0xf3
     from-mba
-    dec         # length - 1 (exclude head)
 
     rarb 0x3a
     to-mba      # MEM[0x3a] = segments to check
-    
+
+    acc 2
+    rarb 0x4a
+    to-mba     # MEM[0x4a] = 2 segments to check
+
     # loading head position
     rarb 0x01
     from-mba
@@ -1322,7 +1336,7 @@ check_body_collision:
     from-mba
     rarb 0x3c
     to-mba      # MEM[0x3c] = head col
-    
+
     # initialize segment counter (start from segment 2, which is at [0x03, 0x04])
     acc 3
     rarb 0x3d
@@ -1405,14 +1419,20 @@ check_body_collision:
         inc*-mba    # increment RD
 
         continue_loop:
-            rarb 0x3a
-            dec*-mba    # one less segment to check
+            rarb 0x4a
             from-mba
-            bnez collision_check_loop  # continue if segments left != 0
+            beqz decrease_length
+            dec*-mba
+            b collision_check_loop
+
+            decrease_length:
+                rarb 0x3a
+                dec*-mba    # one less segment to check
+                from-mba
+                bnez collision_check_loop  # continue if segments left != 0
 
     no_body_collision:
         ret
-
 
 
 draw_food:
@@ -1582,9 +1602,10 @@ draw_score:
     rarb 243
     from-mba
     to-reg 4
-    # xor-mba
-    # beqz init
-    # from-reg 4
+
+
+
+    from-reg 4
     xor 1
     beqz draw_1
     from-reg 4
@@ -1960,4 +1981,19 @@ draw_15:
     to-mba
     rarb 226
     to-mba
-    b after_draw_score
+
+    rarb 0x00 
+    
+    delay_all_loop:
+        inc*-reg 0
+        from-reg 0  # acc = RA
+        and 15      # check if RA = 0xF for incrementing RB
+        beqz delay_rb_all
+        b delay_all_loop     
+
+    delay_rb_all:
+        inc*-reg 1
+        from-reg 1  # acc = RB
+        and 15      # check if RB = 0xF for stopping
+        b init
+        b delay_all_loop
