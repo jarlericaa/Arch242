@@ -2,7 +2,7 @@ init:
     call clear_screen
     call init_snake
     call draw_divider
-    call draw_score
+    call draw_0
     call draw_food
     call draw_snake
 
@@ -19,7 +19,6 @@ game_loop:
         call check_direction
         call after_move
         call draw_food
-        call draw_score
         # call check_collision
         # call check_eat_food
         b game_loop
@@ -890,6 +889,9 @@ after_move: # draw new head and clear old tail
 food_collision:
     rarb 0xf3
     inc*-mba
+
+    b draw_score
+    after_draw_score:
     
     add_segment:
         # +1 length
@@ -1371,7 +1373,7 @@ draw_1:
     to-mba
     rarb 231
     to-mba
-    ret
+    b after_draw_score
 
 draw_2:
     acc 8
@@ -1395,7 +1397,7 @@ draw_2:
     acc 2
     rarb 211
     to-mba
-    ret
+    b after_draw_score
 
 draw_3:
     acc 8
@@ -1419,7 +1421,7 @@ draw_3:
     to-mba
     rarb 226
     to-mba
-    ret
+    b after_draw_score
 
 draw_4:
     acc 8
@@ -1443,7 +1445,7 @@ draw_4:
     acc 3
     rarb 216
     to-mba
-    ret
+    b after_draw_score
 
 draw_5:
     acc 8
@@ -1467,7 +1469,7 @@ draw_5:
     to-mba
     rarb 226
     to-mba
-    ret
+    b after_draw_score
 
 draw_6:
     acc 8
@@ -1495,7 +1497,7 @@ draw_6:
     to-mba
     rarb 226
     to-mba
-    ret
+    b after_draw_score
 
 draw_7:
     acc 8
@@ -1515,7 +1517,7 @@ draw_7:
     to-mba
     rarb 231
     to-mba
-    ret
+    b after_draw_score
 
 draw_8:
     acc 8
@@ -1545,7 +1547,7 @@ draw_8:
     to-mba
     rarb 226
     to-mba
-    ret
+    b after_draw_score
 
 draw_9:
     acc 8
@@ -1569,7 +1571,7 @@ draw_9:
     to-mba
     rarb 231
     to-mba
-    ret
+    b after_draw_score
 
 draw_10:
     acc 4
@@ -1599,7 +1601,7 @@ draw_10:
     to-mba
     rarb 226
     to-mba
-    ret
+    b after_draw_score
 
 draw_11:
     acc 8
@@ -1628,7 +1630,7 @@ draw_11:
     to-mba
     rarb 231
     to-mba
-    ret
+    b after_draw_score
 
 draw_12:
     acc 4
@@ -1659,7 +1661,7 @@ draw_12:
     to-mba
     rarb 226
     to-mba
-    ret
+    b after_draw_score
 
 draw_13:
     acc 4
@@ -1689,7 +1691,7 @@ draw_13:
     to-mba
     rarb 226
     to-mba
-    ret
+    b after_draw_score
 
 draw_14:
     acc 4
@@ -1720,7 +1722,7 @@ draw_14:
     to-mba
     rarb 231
     to-mba
-    ret
+    b after_draw_score
 
 draw_15:
     acc 4
@@ -1751,4 +1753,4 @@ draw_15:
     to-mba
     rarb 226
     to-mba
-    ret
+    b after_draw_score
