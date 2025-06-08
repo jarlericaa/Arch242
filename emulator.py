@@ -100,6 +100,8 @@ class Arch242Emulator:
                 if val & (1 << bit):
                     if bit == 0 and addr in [195, 200, 205, 210, 215, 220, 225, 230, 235, 240]:
                         pyxel.rect(col * CELL_DIM, row * CELL_DIM, CELL_DIM, CELL_DIM, 12)
+                    elif row == self.data_mem[0xf4] and col == self.data_mem[0xf5]:
+                        pyxel.rect(col * CELL_DIM, row * CELL_DIM, CELL_DIM, CELL_DIM, 8)
                     else:
                         pyxel.rect(col * CELL_DIM, row * CELL_DIM, CELL_DIM, CELL_DIM, 11)
 
