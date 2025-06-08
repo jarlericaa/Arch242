@@ -1,5 +1,5 @@
 init:
-    call clear_screen
+    call clear_all
     call init_snake
     call draw_divider
     call draw_0
@@ -17,6 +17,7 @@ game_loop:
         jump:
         call move_snake
         call check_direction
+        call check_body_collision
         call after_move
         call draw_food
         # call check_collision
@@ -363,27 +364,50 @@ init_snake:
     to-mba
     ret
 
-clear_screen:
-    rarb 0xC0 # first LED address, let RA be 0x0 and RB be 0xC
+clear_all:
+    rarb 0x00 
 
-    clear_screen_loop:
+    clear_all_loop:
         acc 0
         to-mba
         inc*-reg 0
         from-reg 0  # acc = RA
         and 15      # check if RA = 0xF for incrementing RB
-        beqz increment_rb
-        b clear_screen_loop     # otherwise continue clearing
+        beqz increment_rb_all
+        b clear_all_loop     # otherwise continue clearing
 
-    increment_rb:
+    increment_rb_all:
         inc*-reg 1
         from-reg 1  # acc = RB
         and 15      # check if RB = 0xF for stopping
-        beqz clear_screen_done
-        b clear_screen_loop
+        beqz clear_all_done
+        b clear_all_loop
 
-    clear_screen_done:
+    clear_all_done:
         ret
+
+# clear_all:
+#     rarb 0x00
+
+#     clear_all_loop:
+#         acc 0
+#         to-mba
+#         inc*-reg 0
+#         from-reg    # acc = RA
+#         and 15      # check if RA = 0xF for incrementing RB
+#         beqz increment_rb_all
+#         b clear_all_loop
+
+#     increment_rb_all:
+#         inc*-reg 1
+#         from-reg 1
+#         and 15
+
+#         beqz clear_clear_all_done
+#         b clear_all_loop
+
+#     clear_all_done:
+#         ret
 
 draw_snake:
     rcrd 0x00
@@ -1133,6 +1157,124 @@ food_collision:
         to-mba
     
     b after_food_collision
+
+check_body_collision:
+    # Load snake length
+    rarb 0x00
+    from-mba
+    dec         # length - 1 (exclude head)
+
+    rarb 0x3a
+    to-mba      # MEM[0x3a] = segments to check
+    
+    # loading head position
+    rarb 0x01
+    from-mba
+    rarb 0x3b
+    to-mba      # MEM[0x3b] = head row
+    
+    rarb 0x02  
+    from-mba
+    rarb 0x3c
+    to-mba      # MEM[0x3c] = head col
+    
+    # initialize segment counter (start from segment 2, which is at [0x03, 0x04])
+    acc 3
+    rarb 0x3d
+    to-mba      # MEM[0x3d] = current segment row address (RC part)
+
+    acc 0
+    rarb 0x3e
+    to-mba      # MEM[0x3e] = current segment address (RD part)
+
+    collision_check_loop:
+        # set up RD:RC for the segment row address
+        rarb 0x3e
+        from-mba
+        to-reg 3    # RD = segment address high nibble
+        rarb 0x3d
+        from-mba
+        to-reg 2    # RC = segment address low nibble
+        
+        # check if row matches
+        from-mdc    # ACC = current segment row
+        rarb 0x3b   
+
+        xor-ba    # ACC = segment_row XOR head_row
+        bnez inc_to_col  # if different rows, skip to next segment
+        
+        # rows match, now check column - increment address by 1
+        rarb 0x3d
+        from-mba
+        inc         # increment RC value
+        and 15      # check if it wrapped (became > 15)
+        to-mba      # store back incremented RC
+
+        bnez setup_col_check  # if RC != 0, no wraparound
+        
+        # RC wrapped to 0, increment RD
+        rarb 0x3e
+        inc*-mba    # increment RD
+        
+        setup_col_check:
+            rarb 0x3e
+            from-mba
+            to-reg 3    # RD = segment address high nibble
+            rarb 0x3d
+            from-mba
+            to-reg 2    # RC = segment address low nibble
+        
+
+        from-mdc    # ACC = current segment col
+        rarb 0x3c   
+        xor-ba    # ACC = segment_col XOR head_col
+        beqz body_collision  # if same (result is 0), collision detected!
+        b inc_to_row
+
+
+        
+    inc_to_col:
+        # move to its column (increment address by 1 more)
+        rarb 0x3d
+        from-mba
+        inc         # increment RC value
+        and 15      # handle wraparound
+        rarb 0x3d
+        to-mba      # store back incremented RC
+        bnez inc_to_row  # if RC != 0, no wraparound
+
+        
+        # RC wrapped to 0, increment RD
+        rarb 0x3e
+        inc*-mba    # increment RD
+
+    inc_to_row:
+        # move to next segment (increment address by 1 more)
+        rarb 0x3d
+        from-mba
+        inc         # increment RC value
+        and 15      # handle wraparound
+        rarb 0x3d
+        to-mba      # store back incremented RC
+        bnez continue_loop  # if RC != 0, no wraparound
+
+        
+        # RC wrapped to 0, increment RD
+        rarb 0x3e
+        inc*-mba    # increment RD
+
+        continue_loop:
+            rarb 0x3a
+            dec*-mba    # one less segment to check
+            from-mba
+            bnez collision_check_loop  # continue if segments left != 0
+
+    no_body_collision:
+        ret
+
+    body_collision:
+        b restart
+
 
 
 bounds_collision:
