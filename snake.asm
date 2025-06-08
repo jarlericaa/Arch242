@@ -82,7 +82,7 @@ game_loop:
         to-mba # 0x37 == food row colflag
         rcrd 0x39
         from-mdc # acc == food col colflag
-        xor*-mba
+        or*-mba
         from-mba
 
         rarb 1
@@ -127,7 +127,7 @@ game_loop:
         to-mba # 0x37 == food row colflag
         rcrd 0x39
         from-mdc # acc == food col colflag
-        xor*-mba
+        or*-mba
         from-mba
 
         rarb 1
@@ -171,7 +171,7 @@ game_loop:
         to-mba # 0x37 == food row colflag
         rcrd 0x39
         from-mdc # acc == food col colflag
-        xor*-mba
+        or*-mba
         from-mba
         
         rarb 2
@@ -216,7 +216,7 @@ game_loop:
         to-mba # 0x37 == food row colflag
         rcrd 0x39
         from-mdc # acc == food col colflag
-        xor*-mba
+        or*-mba
         from-mba # acc == food col 
 
         rarb 2
