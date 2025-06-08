@@ -20,8 +20,57 @@ init:
         clear_all_done:
  
     call init_snake
-    call draw_divider
-    call draw_0
+    draw_divider:
+        acc 1
+        rarb 195
+        to-mba
+        rarb 200
+        to-mba
+        rarb 205
+        to-mba
+        rarb 210
+        to-mba
+        rarb 215
+        to-mba
+        rarb 220
+        to-mba
+        rarb 225
+        to-mba
+        rarb 230
+        to-mba
+        rarb 235
+        to-mba
+        rarb 240
+        to-mba
+
+    draw_0:
+        acc 8
+        rarb 205
+        or*-mba
+        rarb 210
+        or*-mba
+        rarb 215
+        or*-mba
+        rarb 220
+        or*-mba
+        rarb 225
+        or*-mba
+        rarb 230
+        or*-mba
+        acc 3
+        rarb 231
+        to-mba
+        rarb 206
+        to-mba
+        acc 2
+        rarb 226
+        to-mba
+        rarb 221
+        to-mba
+        rarb 216
+        to-mba
+        rarb 211
+        to-mba
     call draw_food
     call draw_snake
 
@@ -1105,9 +1154,7 @@ food_collision:
         addc-mba
         rarb 0xf4
         addc-mba
-        rot-l
         and 8
-        add 1
         rarb 0xf4
         to-mba
         
@@ -1124,7 +1171,7 @@ food_collision:
         rarb 0xf5
         addc-mba
         and 8
-        add 2
+        inc
         rarb 0xf5
         to-mba
 
@@ -1244,12 +1291,12 @@ food_collision:
         change_food_pos:
             rarb 0xf4
             from-mba
-            add 2
+            inc
             and 8
             to-mba
             rarb 0xf5
             from-mba
-            add 3
+            inc
             and 8
             to-mba
             b check_food_collision
@@ -1533,9 +1580,9 @@ draw_score:
     rarb 243
     from-mba
     to-reg 4
-    xor 0
-    beqz draw_0
-    from-reg 4
+    # xor-mba
+    # beqz init
+    # from-reg 4
     xor 1
     beqz draw_1
     from-reg 4
@@ -1580,60 +1627,6 @@ draw_score:
     from-reg 4
     xor 15
     beqz draw_15
-
-draw_divider:
-    acc 1
-    rarb 195
-    to-mba
-    rarb 200
-    to-mba
-    rarb 205
-    to-mba
-    rarb 210
-    to-mba
-    rarb 215
-    to-mba
-    rarb 220
-    to-mba
-    rarb 225
-    to-mba
-    rarb 230
-    to-mba
-    rarb 235
-    to-mba
-    rarb 240
-    to-mba
-    ret
-
-draw_0:
-    acc 8
-    rarb 205
-    or*-mba
-    rarb 210
-    or*-mba
-    rarb 215
-    or*-mba
-    rarb 220
-    or*-mba
-    rarb 225
-    or*-mba
-    rarb 230
-    or*-mba
-    acc 3
-    rarb 231
-    to-mba
-    rarb 206
-    to-mba
-    acc 2
-    rarb 226
-    to-mba
-    rarb 221
-    to-mba
-    rarb 216
-    to-mba
-    rarb 211
-    to-mba
-    ret
 
 draw_1:
     acc 1
