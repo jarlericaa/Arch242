@@ -1154,7 +1154,9 @@ food_collision:
         addc-mba
         rarb 0xf4
         addc-mba
+        rot-l
         and 8
+        inc
         rarb 0xf4
         to-mba
         
@@ -1170,8 +1172,8 @@ food_collision:
         addc-mba
         rarb 0xf5
         addc-mba
+        rot-r
         and 8
-        inc
         rarb 0xf5
         to-mba
 
@@ -1291,12 +1293,12 @@ food_collision:
         change_food_pos:
             rarb 0xf4
             from-mba
-            inc
+            xor 7
             and 8
             to-mba
             rarb 0xf5
             from-mba
-            inc
+            xor 9
             and 8
             to-mba
             b check_food_collision
