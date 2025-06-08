@@ -1,4 +1,5 @@
 init:
+    call clear_screen
     call init_snake
     call draw_divider
     call draw_score
@@ -207,6 +208,28 @@ init_snake:
     to-mba
     ret
 
+
+clear_screen:
+    rarb 0xC0 # first LED address, let RA be 0x0 and RB be 0xC
+
+    clear_screen_loop:
+        acc 0
+        to-mba
+        inc*-reg 0
+        from-reg 0  # acc = RA
+        sub 15      # check if RA = 0xF for incrementing RB
+        beqz increment_rb
+        b clear_screen_loop     # otherwise continue clearing
+
+    increment_rb:
+        inc*-reg 1
+        from-reg 1  # acc = RB
+        sub 15      # check if RB = 0xF for stopping
+        beqz clear_screen_done
+        b clear_screen_loop
+
+    clear_screen_done:
+        ret
 
 
 draw_snake:
