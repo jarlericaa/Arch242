@@ -1142,25 +1142,28 @@ food_collision:
 
     spawn_food:
         # food r 0xf4, c 0xf5
-        # food_row = rotl(food_row + head_row + tail_col) & 0x8 + 1
-        rcrd 0xfd
+        # food_row = rotl((food_col + head_row + tail_col) ^ food_col) & 0x8 + 1
+        rcrd 0xfd # tail col pointer (lower nibble)
         from-mdc
         to-reg 0
-        rarb 0xfc
+        rarb 0xfc # tail col pointer (upper nibble)
         from-mdc
         to-reg 1
-        addc-mba
-        rarb 0x01
-        addc-mba
-        rarb 0xf4
-        addc-mba
+        addc-mba # acc += tail col
+        rarb 0x01 # head row
+        addc-mba # acc += head row
+        rarb 0xf5 # food col
+        addc-mba # acc += food col
+        xor-ba
         rot-l
+        xor-ba
+        rot-r
         and 8
         inc
-        rarb 0xf4
+        # rarb 0xf4
         to-mba
         
-        # food_col = (food_col + head_col + tail_row) & 0x8 + 2
+        # food_col = (food_row + head_col + tail_row) & 0x8 + 2
         rcrd 0xff
         from-mdc
         to-reg 0
@@ -1170,11 +1173,11 @@ food_collision:
         addc-mba
         rarb 0x02
         addc-mba
-        rarb 0xf5
+        rarb 0xf4
         addc-mba
         rot-r
         and 8
-        rarb 0xf5
+        # rarb 0xf5
         to-mba
 
     # food collision check logic
@@ -1302,14 +1305,14 @@ food_collision:
 
     food_collided:
         change_food_pos:
-            rarb 0xf4
-            from-mba
-            xor 7
-            and 8
-            to-mba
+            rcrd 0xf4
+            from-mdc
             rarb 0xf5
+            xor-ba
+            and 8
+            to-mdc
             from-mba
-            xor 9
+            rot-r
             and 8
             to-mba
             b check_food_collision
