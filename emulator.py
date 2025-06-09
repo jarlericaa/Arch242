@@ -1,4 +1,5 @@
 import sys
+import os
 import pyxel
 
 # display configurations
@@ -11,7 +12,7 @@ class Arch242Emulator:
     def __init__(self, instr_hex: list[str]):
         if len(instr_hex) > 2**16:
             sys.exit("Instructions do not fit the memory")
-        
+
         self.isa = Arch242ISA(self)
         self.dispatch_table = {
             0x00: self.isa.rotr, 0x01: self.isa.rotl, 0x02: self.isa.rotrc,
@@ -56,10 +57,13 @@ class Arch242Emulator:
         self.ioa = 0 # 4-bit register
 
         self.running = True
-        self.debugging = True
+        self.debugging = False
         if self.debugging:
+            folder = "logs"
+            file_path = os.path.join(folder, "output.txt")
+            os.makedirs(folder, exist_ok=True)
             open("logs/debugging.txt", 'w').close()
-        pyxel.init(CELL_DIM * NUM_COLS, CELL_DIM * NUM_ROWS, title="Arch242 Emulator", fps=1500)
+        pyxel.init(CELL_DIM * NUM_COLS, CELL_DIM * NUM_ROWS, title="Arch242 Emulator", fps=2000)
         pyxel.run(self.update, self.draw)
 
     def update(self):
@@ -71,6 +75,9 @@ class Arch242Emulator:
             self.process_instruction(self.instr_mem[self.pc])
             if self.debugging:
                 with open("logs/debugging.txt", 'a') as f:
+                    f.write(f"score: {self.data_mem[0xf3]}\n")
+                    f.write(f"food position: row={self.data_mem[0xf4]} and col={self.data_mem[0xf5]}\n")
+                    f.write(f"address {self.reg[1] << 2 | self.reg[0]} MEM[RB:RA] = {self.data_mem[self.reg[1] << 2 | self.reg[0]]}\n")
                     f.write(f"acc: {self.acc}\n")
                     f.write(f"cf: {self.cf}\n")
                     f.write(f"temp: {self.temp}\n")
@@ -79,7 +86,6 @@ class Arch242Emulator:
                     f.write(F"ioa: {self.ioa}\n")
                     f.write(f"length: {self.data_mem[0x00]}\n")
                     f.write(f"head position: r: {self.data_mem[0x01]}, c: {self.data_mem[0x02]}\n")
-                    f.write(f"NULL: r: {self.data_mem[0x07]}, c: {self.data_mem[0x08]}\n")
                     f.write(f"tail pointer r: 0x{self.data_mem[0xfe]}{self.data_mem[0xff]}\n")
                     f.write(f"tail pointer c: 0x{self.data_mem[0xfc]}{self.data_mem[0xfd]}\n")
                     f.write(f"0x35: {self.data_mem[0x35]}\n")
